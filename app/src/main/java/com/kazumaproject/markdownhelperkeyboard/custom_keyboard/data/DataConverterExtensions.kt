@@ -34,6 +34,7 @@ fun FlickMapping.toFlickAction(): FlickAction {
         "VoiceInput" -> KeyAction.VoiceInput
         "ShiftKey" -> KeyAction.ShiftKey
         "MoveCustomKeyboardTab" -> KeyAction.MoveCustomKeyboardTab
+        "SWITCH_ACTION" -> KeyActionMapper.toKeyAction(this.actionValue)
         else -> null
     }
     return if (action != null) {
@@ -79,6 +80,7 @@ fun FlickAction.toDbStrings(): Pair<String, String?> {
             KeyAction.VoiceInput -> "VoiceInput" to null
             KeyAction.ShiftKey -> "ShiftKey" to null
             KeyAction.MoveCustomKeyboardTab -> "MoveCustomKeyboardTab" to null
+            is KeyAction.SwitchAction -> "SWITCH_ACTION" to KeyActionMapper.fromKeyAction(action)
             else -> "UNKNOWN" to null // 未対応のアクション
         }
     }

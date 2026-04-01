@@ -5443,6 +5443,48 @@ class IMEService : InputMethodService(), LifecycleOwner, InputConnection,
 
                     KeyAction.ShiftKey -> {}
                     KeyAction.MoveCustomKeyboardTab -> {}
+
+                    is KeyAction.SwitchAction -> {
+                        when (action.actionType) {
+                            "qwerty" -> {
+                                customKeyboardMode = KeyboardInputMode.ENGLISH
+                                createNewKeyboardLayoutForSumire()
+                                val inputMode = InputMode.ModeEnglish
+                                mainView.keyboardView.setCurrentMode(inputMode)
+                            }
+                            "number" -> {
+                                customKeyboardMode = KeyboardInputMode.SYMBOLS
+                                createNewKeyboardLayoutForSumire()
+                                val inputMode = InputMode.ModeNumber
+                                mainView.keyboardView.setCurrentMode(inputMode)
+                            }
+                            "emoji" -> {
+                                // Logic for emoji keyboard if any
+                            }
+                            "next_ime" -> {
+                                showListPopup()
+                            }
+                            "next_custom" -> {
+                                scope.launch {
+                                    if (customLayouts.isNotEmpty()) {
+                                        val position =
+                                            (currentCustomKeyboardPosition + 1) % customLayouts.size
+                                        setKeyboardTab(position)
+                                    }
+                                }
+                            }
+                            "custom" -> {
+                                val targetId = action.params["target_id"]?.toLongOrNull()
+                                if (targetId != null) {
+                                    val index = customLayouts.indexOfFirst { it.layoutId == targetId }
+                                    if (index != -1) {
+                                        setKeyboardTab(index)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     KeyAction.ToggleKatakana -> {}
                     KeyAction.DeleteUntilSymbol -> {}
                     KeyAction.MoveCursorDown -> {
@@ -5503,6 +5545,7 @@ class IMEService : InputMethodService(), LifecycleOwner, InputConnection,
                     KeyAction.SwitchToNumberLayout -> {}
                     KeyAction.ShiftKey -> {}
                     KeyAction.MoveCustomKeyboardTab -> {}
+                    is KeyAction.SwitchAction -> {}
                     KeyAction.ToggleKatakana -> {}
                     KeyAction.DeleteUntilSymbol -> {}
                     KeyAction.MoveCursorDown -> {}
@@ -5637,6 +5680,7 @@ class IMEService : InputMethodService(), LifecycleOwner, InputConnection,
                     KeyAction.SwitchToNumberLayout -> {}
                     KeyAction.ShiftKey -> {}
                     KeyAction.MoveCustomKeyboardTab -> {}
+                    is KeyAction.SwitchAction -> {}
                     KeyAction.ToggleKatakana -> {}
                     KeyAction.DeleteUntilSymbol -> {}
                     KeyAction.MoveCursorDown -> {
@@ -5756,6 +5800,7 @@ class IMEService : InputMethodService(), LifecycleOwner, InputConnection,
                     KeyAction.SwitchToNumberLayout -> {}
                     KeyAction.ShiftKey -> {}
                     KeyAction.MoveCustomKeyboardTab -> {}
+                    is KeyAction.SwitchAction -> {}
                     KeyAction.ToggleKatakana -> {}
                     KeyAction.DeleteUntilSymbol -> {
                         if (isDeleteLeftFlickPreference == true) {

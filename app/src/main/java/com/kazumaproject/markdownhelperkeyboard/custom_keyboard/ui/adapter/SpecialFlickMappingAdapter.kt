@@ -33,9 +33,14 @@ data class DisplayActionUi(
 
 class SpecialFlickMappingAdapter(
     private val context: Context,
-    private val displayActions: List<DisplayActionUi>,
+    private var displayActions: List<DisplayActionUi>,
     private val onItemUpdated: (SpecialFlickMappingItem) -> Unit
 ) : ListAdapter<SpecialFlickMappingItem, SpecialFlickMappingAdapter.VH>(DIFF) {
+
+    fun updateDisplayActions(newDisplayActions: List<DisplayActionUi>) {
+        displayActions = newDisplayActions
+        notifyDataSetChanged()
+    }
 
     companion object {
         private val DIFF = object : DiffUtil.ItemCallback<SpecialFlickMappingItem>() {

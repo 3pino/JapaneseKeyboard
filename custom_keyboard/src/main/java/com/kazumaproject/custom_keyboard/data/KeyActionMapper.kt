@@ -2,6 +2,8 @@ package com.kazumaproject.custom_keyboard.data
 
 import android.content.Context
 import com.kazumaproject.custom_keyboard.R
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 data class DisplayAction(
     val action: KeyAction,
@@ -11,13 +13,26 @@ data class DisplayAction(
 
 object KeyActionMapper {
 
+    private val gson = Gson()
+
     /**
      * Generates a list of DisplayAction objects using localized strings.
      * @param context The context needed to access string resources.
      * @return A list of DisplayAction objects.
      */
     fun getDisplayActions(context: Context): List<DisplayAction> {
-        return listOf(
+        return getDisplayActionsWithCustom(context, emptyList())
+    }
+
+    /**
+     * Extended version that can include dynamic switch actions for custom keyboards.
+     * @param customKeyboards List of Pair(id, name)
+     */
+    fun getDisplayActionsWithCustom(
+        context: Context,
+        customKeyboards: List<Pair<String, String>>
+    ): List<DisplayAction> {
+        val actions = mutableListOf(
             DisplayAction(
                 KeyAction.Delete,
                 context.getString(R.string.action_delete),
@@ -55,12 +70,12 @@ object KeyActionMapper {
                 com.kazumaproject.core.R.drawable.content_copy_24dp
             ),
             DisplayAction(
-                KeyAction.SwitchToNextIme,
+                KeyAction.SwitchAction("next_ime"),
                 context.getString(R.string.action_switch_to_next_ime),
                 com.kazumaproject.core.R.drawable.language_24dp
             ),
             DisplayAction(
-                KeyAction.ShowEmojiKeyboard,
+                KeyAction.SwitchAction("emoji"),
                 context.getString(R.string.action_show_emoji_keyboard),
                 com.kazumaproject.core.R.drawable.baseline_emoji_emotions_24
             ),
@@ -80,7 +95,7 @@ object KeyActionMapper {
                 com.kazumaproject.core.R.drawable.shift_24px
             ),
             DisplayAction(
-                KeyAction.MoveCustomKeyboardTab,
+                KeyAction.SwitchAction("next_custom"),
                 context.getString(R.string.action_move_custom_keyboard_tab),
                 com.kazumaproject.core.R.drawable.keyboard_command_key_24px
             ),
@@ -100,12 +115,12 @@ object KeyActionMapper {
                 com.kazumaproject.core.R.drawable.text_select_start_24dp
             ),
             DisplayAction(
-                KeyAction.SwitchToEnglishLayout,
+                KeyAction.SwitchAction("qwerty"),
                 context.getString(R.string.switch_qwerty),
                 com.kazumaproject.core.R.drawable.input_mode_english_custom
             ),
             DisplayAction(
-                KeyAction.SwitchToNumberLayout,
+                KeyAction.SwitchAction("number"),
                 context.getString(R.string.switch_number),
                 com.kazumaproject.core.R.drawable.input_mode_number_select_custom
             ),
@@ -120,10 +135,30 @@ object KeyActionMapper {
                 com.kazumaproject.core.R.drawable.settings_voice_24px
             )
         )
+
+        // Add dynamic custom keyboard switch actions
+        customKeyboards.forEach { (id, name) ->
+            actions.add(
+                DisplayAction(
+                    KeyAction.SwitchAction("custom", mapOf("target_id" to id)),
+                    "Switch to: $name",
+                    com.kazumaproject.core.R.drawable.keyboard_command_key_24px
+                )
+            )
+        }
+
+        return actions
     }
 
     // KeyActionオブジェクトをDB保存用の文字列に変換
     fun fromKeyAction(keyAction: KeyAction?): String? {
+        if (keyAction is KeyAction.SwitchAction) {
+            val map = mutableMapOf<String, Any>()
+            map["action"] = "switch"
+            map["type"] = keyAction.actionType
+            map["params"] = keyAction.params
+            return gson.toJson(map)
+        }
         return when (keyAction) {
             is KeyAction.Delete -> "Delete"
             is KeyAction.Backspace -> "Backspace"
@@ -158,6 +193,23 @@ object KeyActionMapper {
 
     // DBから読み込んだ文字列をKeyActionオブジェクトに変換
     fun toKeyAction(actionString: String?): KeyAction? {
+        if (actionString == null) return null
+        if (actionString.startsWith("{")) {
+            return try {
+                val type = object : TypeToken<Map<String, Any>>() {}.type
+                val map: Map<String, Any> = gson.fromJson(actionString, type)
+                if (map["action"] == "switch") {
+                    val actionType = map["type"] as String
+                    @Suppress("UNCHECKED_CAST")
+                    val params = map["params"] as? Map<String, String> ?: emptyMap()
+                    KeyAction.SwitchAction(actionType, params)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
         return when (actionString) {
             "Delete" -> KeyAction.Delete
             "Backspace" -> KeyAction.Backspace

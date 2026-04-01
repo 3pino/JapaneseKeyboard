@@ -53,6 +53,11 @@ sealed class KeyAction {
     data object ShiftKey : KeyAction()
     data object MoveCustomKeyboardTab : KeyAction()
 
+    data class SwitchAction(
+        val actionType: String,
+        val params: Map<String, String> = emptyMap()
+    ) : KeyAction()
+
     // ひらがな・英語用
     data object ToggleDakuten : KeyAction() // 濁点・半濁点・小文字化
     data object ToggleCase : KeyAction()    // 英語の大文字・小文字切り替え

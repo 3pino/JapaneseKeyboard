@@ -124,17 +124,16 @@ class KeyEditorFragment : Fragment(R.layout.fragment_key_editor) {
         binding.twoStepMappingsRecyclerView.adapter = twoStepAdapter
         binding.twoStepMappingsRecyclerView.layoutManager = LinearLayoutManager(context)
 
-        // Convert KeyActionMapper display actions into stable UI list
-        val raw = KeyActionMapper.getDisplayActions(requireContext())
-        displayActions = raw.map { DisplayActionUi(it.displayName, it.action, it.iconResId) }
-
-        val actionDisplayNames = displayActions.map { it.displayName }
+        // Initial setup for adapters, will be refreshed in setupKeyActionSpinner
+        displayActions = emptyList()
         keyActionAdapter = ArrayAdapter(
             requireContext(),
             android.R.layout.simple_spinner_dropdown_item,
-            actionDisplayNames
+            mutableListOf()
         )
         binding.keyActionSpinner.setAdapter(keyActionAdapter)
+
+        setupKeyActionSpinner()
 
         // NEW: Special flick adapter
         specialFlickAdapter = SpecialFlickMappingAdapter(
@@ -150,6 +149,26 @@ class KeyEditorFragment : Fragment(R.layout.fragment_key_editor) {
         )
         binding.specialFlickMappingsRecyclerView.adapter = specialFlickAdapter
         binding.specialFlickMappingsRecyclerView.layoutManager = LinearLayoutManager(context)
+    }
+
+    private fun setupKeyActionSpinner() {
+        lifecycleScope.launch {
+            val layouts = keyboardRepository.getLayoutsNotFlow()
+            val customPairs = layouts.map { it.layoutId.toString() to it.name }
+            val raw = KeyActionMapper.getDisplayActionsWithCustom(requireContext(), customPairs)
+            displayActions = raw.map { DisplayActionUi(it.displayName, it.action, it.iconResId) }
+
+            val actionDisplayNames = displayActions.map { it.displayName }
+            keyActionAdapter.clear()
+            keyActionAdapter.addAll(actionDisplayNames)
+            keyActionAdapter.notifyDataSetChanged()
+
+            // Refresh special flick adapter with new display actions
+            specialFlickAdapter?.updateDisplayActions(displayActions)
+
+            // Re-bind current key data to update spinner selection if already loaded
+            currentKeyData?.let { bindKeyData(it) }
+        }
     }
 
     private fun setupUIListeners() {
