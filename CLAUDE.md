@@ -1,52 +1,27 @@
-# JapaneseKeyboard フォーク運用メモ
+ブランチの管理
 
-このリポジトリは [KazumaProject/JapaneseKeyboard](https://github.com/KazumaProject/JapaneseKeyboard) のフォーク。
-本家へのPR送付を目的としている。
+main：作業ベース。personal設定のコミットを先頭に積む。
+本家PRは main から一時ブランチを切って cherry-pick する。
 
-## ブランチ構成
+開発
 
-- `main` — 本家（upstream/main）と完全同期。直接触らない。
-- `personal` — 開発ベース。CI設定・CLAUDE.md等、本家PRに含めない個人設定を含む。普段はここから作業する。
-- PR用ブランチ（`fix/**`, `feature/**`）— `personal` から切って開発・テスト。本家へPRするときは `main` から切り直してきれいなコミットだけを載せる。
-
-## GitHub Actions
-
-- `personal` または `fix/**`, `feature/**` へのpushで自動的にデバッグビルドが走る（`.github/workflows/build-test.yml`）
-- ビルド成果物（APK）はActionsのArtifactsから7日間ダウンロード可能
-- リリースビルドはタグ（`v*`）のpushで動く（`.github/workflows/android.yml`）
-
-## 普段の開発フロー
-
-```bash
-# personalから作業ブランチを切る
-git checkout personal
-git checkout -b fix/something
-
-# 変更してコミット・push → Actionsでビルドテスト
-git push origin fix/something
-```
-
-## 本家へPRを出すとき
-
-```bash
-# mainから改めてきれいなブランチを切る
 git checkout main
-git checkout -b fix/something-for-upstream
+# 作業して commit
+git push
 
-# cherry-pickまたは手動で変更を再現してコミット
-git cherry-pick <commit-hash>
-git push origin fix/something-for-upstream
-# GitHub上でKazumaProject/JapaneseKeyboardへPRを作成
-```
+PR作成
 
-## 本家の更新を取り込む
+git checkout -b fix/xxx
+git cherry-pick <commit>  # personal設定以外のコミットのみ
+git push
 
-```bash
+upstream同期
+
 git fetch upstream
-git checkout main
-git reset --hard upstream/main
-git push origin main --force
-git checkout personal
-git rebase main
-git push origin personal --force
-```
+git rebase upstream/main
+git push -f
+
+CI
+
+pushでビルド
+タグでリリース
