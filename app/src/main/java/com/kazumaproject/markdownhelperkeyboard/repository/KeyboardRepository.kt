@@ -7,6 +7,7 @@ import com.kazumaproject.custom_keyboard.data.KeyActionMapper
 import com.kazumaproject.custom_keyboard.data.KeyData
 import com.kazumaproject.custom_keyboard.data.KeyType
 import com.kazumaproject.custom_keyboard.data.KeyboardLayout
+import com.kazumaproject.custom_keyboard.data.PopupStyle
 import com.kazumaproject.custom_keyboard.view.TfbiFlickDirection
 import com.kazumaproject.markdownhelperkeyboard.custom_keyboard.data.CustomKeyboardLayout
 import com.kazumaproject.markdownhelperkeyboard.custom_keyboard.data.FlickMapping
@@ -298,6 +299,20 @@ class KeyboardRepository @Inject constructor(
 
         val keys: List<KeyData> = dbLayout.keysWithFlicks.map { keyWithFlicks ->
             val dbKey = keyWithFlicks.key
+            val normalizedKeyType = if (
+                dbKey.keyType == KeyType.STANDARD_FLICK || dbKey.keyType == KeyType.PETAL_FLICK
+            ) {
+                KeyType.CROSS_FLICK
+            } else {
+                dbKey.keyType
+            }
+            val resolvedPopupStyle = if (
+                dbKey.popupStyle == PopupStyle.CIRCLE || dbKey.keyType == KeyType.STANDARD_FLICK
+            ) {
+                PopupStyle.CIRCLE
+            } else {
+                PopupStyle.GRID
+            }
 
             val actionObject: KeyAction? = if (dbKey.isSpecialKey) {
                 KeyActionMapper.toKeyAction(dbKey.action)
@@ -310,8 +325,9 @@ class KeyboardRepository @Inject constructor(
                     label = dbKey.label,
                     row = dbKey.row,
                     column = dbKey.column,
-                    isFlickable = dbKey.keyType != KeyType.NORMAL,
-                    keyType = dbKey.keyType,
+                    isFlickable = normalizedKeyType != KeyType.NORMAL,
+                    keyType = normalizedKeyType,
+                    popupStyle = resolvedPopupStyle,
                     rowSpan = dbKey.rowSpan,
                     colSpan = dbKey.colSpan,
                     isSpecialKey = dbKey.isSpecialKey,
@@ -324,8 +340,9 @@ class KeyboardRepository @Inject constructor(
                     label = dbKey.label,
                     row = dbKey.row,
                     column = dbKey.column,
-                    isFlickable = dbKey.keyType != KeyType.NORMAL,
-                    keyType = dbKey.keyType,
+                    isFlickable = normalizedKeyType != KeyType.NORMAL,
+                    keyType = normalizedKeyType,
+                    popupStyle = resolvedPopupStyle,
                     rowSpan = dbKey.rowSpan,
                     colSpan = dbKey.colSpan,
                     isSpecialKey = true,
@@ -382,6 +399,13 @@ class KeyboardRepository @Inject constructor(
 
         uiLayout.keys.forEach { keyData ->
             val keyIdentifier = keyData.keyId ?: UUID.randomUUID().toString()
+            val normalizedKeyType = if (
+                keyData.keyType == KeyType.STANDARD_FLICK || keyData.keyType == KeyType.PETAL_FLICK
+            ) {
+                KeyType.CROSS_FLICK
+            } else {
+                keyData.keyType
+            }
 
             val actionString: String? = if (keyData.isSpecialKey) {
                 KeyActionMapper.fromKeyAction(keyData.action)
@@ -398,7 +422,8 @@ class KeyboardRepository @Inject constructor(
                     column = keyData.column,
                     rowSpan = keyData.rowSpan,
                     colSpan = keyData.colSpan,
-                    keyType = keyData.keyType,
+                    keyType = normalizedKeyType,
+                    popupStyle = keyData.popupStyle,
                     isSpecialKey = keyData.isSpecialKey,
                     drawableResId = null,
                     keyIdentifier = keyIdentifier,

@@ -26,6 +26,7 @@ import com.kazumaproject.custom_keyboard.data.KeyAction
 import com.kazumaproject.custom_keyboard.data.KeyActionMapper
 import com.kazumaproject.custom_keyboard.data.KeyData
 import com.kazumaproject.custom_keyboard.data.KeyType
+import com.kazumaproject.custom_keyboard.data.PopupStyle
 import com.kazumaproject.custom_keyboard.view.TfbiFlickDirection
 import com.kazumaproject.markdownhelperkeyboard.R
 import com.kazumaproject.markdownhelperkeyboard.custom_keyboard.data.FlickDirectionMapper
@@ -729,9 +730,26 @@ class KeyEditorFragment : Fragment(R.layout.fragment_key_editor) {
             }
         }
 
+        val newPopupStyle = when (newKeyType) {
+            KeyType.CROSS_FLICK -> {
+                if (originalKey.popupStyle == PopupStyle.CIRCLE || originalKey.keyType == KeyType.STANDARD_FLICK) {
+                    PopupStyle.CIRCLE
+                } else {
+                    PopupStyle.GRID
+                }
+            }
+
+            KeyType.TWO_STEP_FLICK,
+            KeyType.STICKY_TWO_STEP_FLICK,
+            KeyType.HIERARCHICAL_FLICK -> PopupStyle.GRID
+
+            else -> originalKey.popupStyle
+        }
+
         val updatedKey = originalKey.copy(
             label = newLabel,
             keyType = newKeyType,
+            popupStyle = newPopupStyle,
             isSpecialKey = isSpecial,
             action = newAction,
             // IMPORTANT: special flick should still be flickable (KeyType != NORMAL)

@@ -56,7 +56,7 @@ import com.kazumaproject.markdownhelperkeyboard.user_template.database.UserTempl
         ThreeNodeRuleEntity::class,
         GemmaPromptTemplate::class,
     ],
-    version = 20,
+    version = 21,
     exportSchema = false
 )
 @TypeConverters(
@@ -133,10 +133,10 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `keyboard_layouts` (
-                        `layoutId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                        `name` TEXT NOT NULL, 
-                        `columnCount` INTEGER NOT NULL, 
-                        `rowCount` INTEGER NOT NULL, 
+                        `layoutId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `name` TEXT NOT NULL,
+                        `columnCount` INTEGER NOT NULL,
+                        `rowCount` INTEGER NOT NULL,
                         `createdAt` INTEGER NOT NULL
                     )
                 """.trimIndent()
@@ -145,17 +145,17 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `key_definitions` (
-                        `keyId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-                        `ownerLayoutId` INTEGER NOT NULL, 
-                        `label` TEXT NOT NULL, 
-                        `row` INTEGER NOT NULL, 
-                        `column` INTEGER NOT NULL, 
-                        `rowSpan` INTEGER NOT NULL, 
-                        `colSpan` INTEGER NOT NULL, 
-                        `keyType` TEXT NOT NULL, 
-                        `isSpecialKey` INTEGER NOT NULL, 
-                        `drawableResId` INTEGER, 
-                        `keyIdentifier` TEXT NOT NULL, 
+                        `keyId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `ownerLayoutId` INTEGER NOT NULL,
+                        `label` TEXT NOT NULL,
+                        `row` INTEGER NOT NULL,
+                        `column` INTEGER NOT NULL,
+                        `rowSpan` INTEGER NOT NULL,
+                        `colSpan` INTEGER NOT NULL,
+                        `keyType` TEXT NOT NULL,
+                        `isSpecialKey` INTEGER NOT NULL,
+                        `drawableResId` INTEGER,
+                        `keyIdentifier` TEXT NOT NULL,
                         FOREIGN KEY(`ownerLayoutId`) REFERENCES `keyboard_layouts`(`layoutId`) ON DELETE CASCADE ON UPDATE NO ACTION
                     )
                 """.trimIndent()
@@ -165,12 +165,12 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `flick_mappings` (
-                        `ownerKeyId` INTEGER NOT NULL, 
-                        `stateIndex` INTEGER NOT NULL, 
-                        `flickDirection` TEXT NOT NULL, 
-                        `actionType` TEXT NOT NULL, 
-                        `actionValue` TEXT, 
-                        PRIMARY KEY(`ownerKeyId`, `stateIndex`, `flickDirection`), 
+                        `ownerKeyId` INTEGER NOT NULL,
+                        `stateIndex` INTEGER NOT NULL,
+                        `flickDirection` TEXT NOT NULL,
+                        `actionType` TEXT NOT NULL,
+                        `actionValue` TEXT,
+                        PRIMARY KEY(`ownerKeyId`, `stateIndex`, `flickDirection`),
                         FOREIGN KEY(`ownerKeyId`) REFERENCES `key_definitions`(`keyId`) ON DELETE CASCADE ON UPDATE NO ACTION
                     )
                 """.trimIndent()
@@ -520,6 +520,21 @@ abstract class AppDatabase : RoomDatabase() {
                     ON `gemma_prompt_template`(`isEnabled`)
                     """.trimIndent()
                 )
+            }
+        }
+
+        /**
+         * バージョン20から21へのマイグレーション。
+         * key_definitions に popupStyle を追加し、旧 STANDARD_FLICK を
+         * CROSS_FLICK + CIRCLE へ正規化します。
+         * 併せて旧 PETAL_FLICK も CROSS_FLICK へ正規化します。
+         */
+        val MIGRATION_20_21 = object : Migration(20, 21) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `key_definitions` ADD COLUMN `popupStyle` TEXT NOT NULL DEFAULT 'GRID'")
+                db.execSQL("UPDATE `key_definitions` SET `popupStyle` = 'CIRCLE' WHERE `keyType` = 'STANDARD_FLICK'")
+                db.execSQL("UPDATE `key_definitions` SET `keyType` = 'CROSS_FLICK' WHERE `keyType` = 'STANDARD_FLICK'")
+                db.execSQL("UPDATE `key_definitions` SET `keyType` = 'CROSS_FLICK' WHERE `keyType` = 'PETAL_FLICK'")
             }
         }
 

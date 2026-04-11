@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.kazumaproject.custom_keyboard.data.PopupStyle
 import com.kazumaproject.custom_keyboard.data.KeyType
 
 /**
@@ -30,6 +31,7 @@ data class KeyDefinition(
     val rowSpan: Int = 1,     // キーの縦幅
     val colSpan: Int = 1,     // キーの横幅
     val keyType: KeyType,     // キーの種類 (NORMAL, CROSS_FLICKなど)
+    val popupStyle: PopupStyle = PopupStyle.GRID,
     val isSpecialKey: Boolean = false,
     val drawableResId: Int? = null,
     val keyIdentifier: String,

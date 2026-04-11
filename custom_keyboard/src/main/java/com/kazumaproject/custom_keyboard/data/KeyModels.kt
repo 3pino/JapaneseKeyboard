@@ -104,10 +104,9 @@ enum class KeyType {
     /**
      * 十字フリックキー
      * PETAL は非推奨。後方互換性のため残す。
+     * STANDARD はスミレ入力キーボードの「サークル入力」。
      */
-    CROSS_FLICK, PETAL_FLICK,
-
-    STANDARD_FLICK,
+    CROSS_FLICK, PETAL_FLICK, STANDARD_FLICK,
 
     TWO_STEP_FLICK,
 
