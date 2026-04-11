@@ -14,6 +14,7 @@ import androidx.core.graphics.drawable.toDrawable
 import com.kazumaproject.custom_keyboard.data.FlickAction
 import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
+import com.kazumaproject.custom_keyboard.layout.SegmentedBackgroundDrawable
 import com.kazumaproject.custom_keyboard.view.DirectionalKeyPopupView
 import com.kazumaproject.custom_keyboard.view.FlickGridPopupView
 import kotlinx.coroutines.CoroutineScope
@@ -23,10 +24,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 import kotlin.math.sqrt
 
-class GridFlickInputController(
+open class GridFlickInputController(
     private val context: Context, private val flickSensitivity: Int
 ) {
 
@@ -48,7 +48,8 @@ class GridFlickInputController(
     private var originalKeyText: CharSequence? = null
     private var longPressTimeout: Long = ViewConfiguration.getLongPressTimeout().toLong()
     private var isLongPressTriggered = false
-    private var longPressAction: FlickAction? = null
+    private var longPressAction: FlickAction.Action? = null
+    private var segmentedDrawable: SegmentedBackgroundDrawable? = null
 
     // 各方向に対応するPopupWindowを保持するMap
     private val popupMap: MutableMap<FlickDirection, PopupWindow> = mutableMapOf()
@@ -77,7 +78,7 @@ class GridFlickInputController(
         gridPopup.exitTransition = null
     }
 
-    fun setPopupColors(theme: FlickPopupColorTheme) {
+    open fun setPopupColors(theme: FlickPopupColorTheme) {
         this.colorTheme = theme
     }
 
@@ -220,6 +221,26 @@ class GridFlickInputController(
         }
     }
 
+    protected open fun showPopup(direction: FlickDirection) {
+        showPopupForDirection(direction)
+    }
+
+    protected open fun dismissPopup() {
+        dismissAllPopups()
+    }
+
+    protected open fun onLongPressTriggered(tapAction: FlickAction.Action?) {
+        dismissAllPopups()
+        showGridPopup()
+        if (tapAction != null) {
+            listener?.onLongPress(tapAction)
+        }
+    }
+
+    protected open fun onUpAfterLongPress(action: FlickAction.Action, isFlick: Boolean) {
+        listener?.onUpAfterLongPress(action, isFlick)
+    }
+
     private fun showGridPopup() {
         val currentAnchor = anchorView ?: return
 
@@ -253,9 +274,124 @@ class GridFlickInputController(
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    fun attach(button: View, map: Map<FlickDirection, FlickAction>) {
-        this.characterMap = map
+    open fun attach(
+        button: View,
+        map: Map<FlickDirection, FlickAction>,
+        drawable: SegmentedBackgroundDrawable? = null
+    ) {
+        this.characterMap = normalizeDirectionMap(map)
+        this.segmentedDrawable = drawable
         button.setOnTouchListener { v, event -> handleTouchEvent(v, event) }
+    }
+
+    protected open fun onActionDown(view: View) {
+        (view as? Button)?.let { button ->
+            originalKeyText = button.text
+            button.text = ""
+        }
+
+        createPopups()
+        characterMap[FlickDirection.TAP]?.let { listener?.onPress(it) }
+
+        currentFlickDirection = null
+        segmentedDrawable?.highlightDirection = FlickDirection.TAP
+
+        showPopupForDirection(FlickDirection.TAP)
+
+        longPressJob?.cancel()
+        longPressJob = controllerScope.launch {
+            delay(longPressTimeout)
+            isLongPressModeActive = true
+            val tapAction = characterMap[FlickDirection.TAP] as? FlickAction.Action
+            if (tapAction != null) {
+                isLongPressTriggered = true
+                longPressAction = tapAction
+            }
+            onLongPressTriggered(tapAction)
+        }
+    }
+
+    protected open fun onActionMove(dx: Float, dy: Float, distance: Float, direction: FlickDirection) {
+        if (distance > flickSensitivity * 0.5f) {
+            longPressJob?.cancel()
+        }
+
+        segmentedDrawable?.highlightDirection = direction
+        if (isLongPressModeActive || distance >= flickSensitivity) {
+            // フリック閾値超え or 長押しモード → グリッドポップアップで方向ハイライト
+            currentVisiblePopup?.let {
+                if (it !== gridPopup) {
+                    it.dismiss()
+                    currentVisiblePopup = null
+                    currentFlickDirection = null
+                }
+            }
+            showGridPopup()
+            (gridPopup.contentView as? FlickGridPopupView)?.highlightKey(direction)
+        } else {
+            // 閾値未満（TAP 状態）→ TAP ポップアップのみ
+            if (direction == FlickDirection.TAP) {
+                showPopupForDirection(FlickDirection.TAP)
+            }
+        }
+    }
+
+    protected open fun onActionUp(finalDirection: FlickDirection) {
+        segmentedDrawable?.highlightDirection = finalDirection
+
+        if (isLongPressTriggered) {
+            val finalAction = characterMap[finalDirection] as? FlickAction.Action
+                ?: longPressAction
+            finalAction?.let {
+                onUpAfterLongPress(it, finalDirection != FlickDirection.TAP)
+            }
+        } else {
+            characterMap[finalDirection]?.let {
+                listener?.onFlick(
+                    it, isFlick = finalDirection != FlickDirection.TAP
+                )
+            }
+        }
+    }
+
+    protected open fun onActionCancel() {
+        // Default: no additional action
+    }
+
+    protected open fun onActionUpEnd() {
+        (anchorView as? Button)?.let { button ->
+            button.text = originalKeyText
+        }
+        originalKeyText = null
+        isLongPressTriggered = false
+        longPressAction = null
+        dismissAllPopups()
+        segmentedDrawable?.highlightDirection = null
+    }
+
+    protected fun normalizeDirectionMap(
+        map: Map<FlickDirection, FlickAction>
+    ): Map<FlickDirection, FlickAction> {
+        val result = mutableMapOf<FlickDirection, FlickAction>()
+        // 1パス目: *_FAR と無関係な方向をそのまま登録
+        for ((direction, action) in map) {
+            val normalized = when (direction) {
+                FlickDirection.UP_LEFT_FAR, FlickDirection.UP_RIGHT_FAR -> direction
+                FlickDirection.UP_LEFT, FlickDirection.UP_RIGHT -> null // 2パス目で処理
+                else -> direction
+            }
+            if (normalized != null) result[normalized] = action
+        }
+        // 2パス目: UP_LEFT/UP_RIGHT を *_FAR のフォールバックとして登録（既存の *_FAR を上書きしない）
+        for ((direction, action) in map) {
+            val normalized = when (direction) {
+                FlickDirection.UP_LEFT -> FlickDirection.UP_LEFT_FAR
+                FlickDirection.UP_RIGHT -> FlickDirection.UP_RIGHT_FAR
+                else -> null
+            }
+            if (normalized != null) result.putIfAbsent(normalized, action)
+        }
+        return result
     }
 
     private fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
@@ -268,34 +404,7 @@ class GridFlickInputController(
                 isLongPressTriggered = false
                 longPressAction = null
 
-                (anchorView as? Button)?.let { button ->
-                    originalKeyText = button.text
-                    button.text = ""
-                }
-
-                createPopups()
-                characterMap[FlickDirection.TAP]?.let { listener?.onPress(it) }
-
-                // 方向の状態を初期化
-                currentFlickDirection = null
-
-                showPopupForDirection(FlickDirection.TAP)
-
-                longPressJob?.cancel()
-                longPressJob = controllerScope.launch {
-                    delay(longPressTimeout)
-                    isLongPressModeActive = true
-                    val tapAction = characterMap[FlickDirection.TAP] as? FlickAction.Action
-                    if (tapAction != null) {
-                        isLongPressTriggered = true
-                        longPressAction = tapAction
-                    }
-                    dismissAllPopups() // 方向ポップアップを消す
-                    showGridPopup()
-                    if (tapAction != null) {
-                        listener?.onLongPress(tapAction)
-                    }
-                }
+                onActionDown(view)
                 return true
             }
 
@@ -303,66 +412,26 @@ class GridFlickInputController(
                 val dx = event.rawX - initialTouchX
                 val dy = event.rawY - initialTouchY
                 val distance = sqrt(dx * dx + dy * dy)
-
-                if (distance > flickSensitivity * 0.5f) {
-                    longPressJob?.cancel()
-                }
-
                 val direction = calculateDirection(dx, dy)
-                if (isLongPressModeActive || distance >= flickSensitivity) {
-                    // フリック閾値超え or 長押しモード → グリッドポップアップで方向ハイライト
-                    currentVisiblePopup?.let {
-                        if (it !== gridPopup) {
-                            it.dismiss()
-                            currentVisiblePopup = null
-                            currentFlickDirection = null
-                        }
-                    }
-                    showGridPopup()
-                    (gridPopup.contentView as? FlickGridPopupView)?.highlightKey(direction)
-                } else {
-                    // 閾値未満（TAP 状態）→ TAP ポップアップのみ
-                    if (direction == FlickDirection.TAP) {
-                        showPopupForDirection(FlickDirection.TAP)
-                    }
-                }
+
+                onActionMove(dx, dy, distance, direction)
                 return true
             }
 
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 longPressJob?.cancel()
                 longPressJob = null
-                val finalDirection = if (event.action == MotionEvent.ACTION_UP) {
-                    val dx = event.rawX - initialTouchX
-                    val dy = event.rawY - initialTouchY
-                    calculateDirection(dx, dy)
-                } else {
-                    FlickDirection.TAP
-                }
 
-                if (isLongPressTriggered) {
-                    val finalAction = characterMap[finalDirection] as? FlickAction.Action
-                        ?: longPressAction
-                    finalAction?.let {
-                        listener?.onUpAfterLongPress(
-                            it,
-                            isFlick = finalDirection != FlickDirection.TAP
-                        )
-                    }
-                } else if (event.action == MotionEvent.ACTION_UP) {
-                    characterMap[finalDirection]?.let {
-                        listener?.onFlick(
-                            it, isFlick = finalDirection != FlickDirection.TAP
-                        )
-                    }
+                if (event.action == MotionEvent.ACTION_CANCEL) {
+                    onActionCancel()
+                } else {
+                    val finalDirection = calculateDirection(
+                        event.rawX - initialTouchX,
+                        event.rawY - initialTouchY
+                    )
+                    onActionUp(finalDirection)
                 }
-                (anchorView as? Button)?.let { button ->
-                    button.text = originalKeyText
-                }
-                originalKeyText = null
-                isLongPressTriggered = false
-                longPressAction = null
-                dismissAllPopups()
+                onActionUpEnd()
                 return true
             }
         }
@@ -378,20 +447,23 @@ class GridFlickInputController(
         currentFlickDirection = null
     }
 
-    private fun calculateDirection(dx: Float, dy: Float): FlickDirection {
+    protected fun calculateDirection(dx: Float, dy: Float): FlickDirection {
         val distance = sqrt(dx * dx + dy * dy)
         if (distance < flickSensitivity) {
             return FlickDirection.TAP
         }
 
-        return if (abs(dx) > abs(dy)) {
-            if (dx > 0) FlickDirection.UP_RIGHT_FAR else FlickDirection.UP_LEFT_FAR
-        } else {
-            if (dy > 0) FlickDirection.DOWN else FlickDirection.UP
+        val angle = Math.toDegrees(kotlin.math.atan2(dy.toDouble(), dx.toDouble()))
+
+        return when {
+            angle > -45 && angle <= 45 -> FlickDirection.UP_RIGHT_FAR
+            angle > 45 && angle <= 135 -> FlickDirection.DOWN
+            angle < -45 && angle >= -135 -> FlickDirection.UP
+            else -> FlickDirection.UP_LEFT_FAR
         }
     }
 
-    fun cancel() {
+    open fun cancel() {
         dismissAllPopups()
         controllerScope.cancel()
     }

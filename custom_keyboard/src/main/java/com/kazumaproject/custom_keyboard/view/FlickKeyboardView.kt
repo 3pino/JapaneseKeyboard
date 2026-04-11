@@ -43,6 +43,7 @@ import com.kazumaproject.custom_keyboard.data.KeyAction
 import com.kazumaproject.custom_keyboard.data.KeyData
 import com.kazumaproject.custom_keyboard.data.KeyType
 import com.kazumaproject.custom_keyboard.data.KeyboardLayout
+import com.kazumaproject.custom_keyboard.data.PopupStyle
 import com.kazumaproject.custom_keyboard.layout.SegmentedBackgroundDrawable
 import kotlin.math.abs
 import kotlin.math.pow
@@ -71,7 +72,6 @@ class FlickKeyboardView @JvmOverloads constructor(
 
     private var listener: OnKeyboardActionListener? = null
     private val flickControllers = mutableListOf<CustomAngleFlickController>()
-    private val standardFlickControllers = mutableListOf<StandardFlickInputController>()
     private val gridFlickControllers = mutableListOf<GridFlickInputController>()
     private val tfbiControllers = mutableListOf<TfbiInputController>()
     private val stickyTfbiControllers = mutableListOf<TfbiStickyFlickController>()
@@ -234,9 +234,6 @@ class FlickKeyboardView @JvmOverloads constructor(
 
         flickControllers.forEach { it.cancel() }
         flickControllers.clear()
-
-        standardFlickControllers.forEach { it.cancel() }
-        standardFlickControllers.clear()
 
         gridFlickControllers.forEach { it.cancel() }
         gridFlickControllers.clear()
@@ -483,29 +480,19 @@ class FlickKeyboardView @JvmOverloads constructor(
      * - UP_RIGHT / UP_RIGHT_FAR → UP_RIGHT_FAR
      * *_FAR が既に存在する場合はそちらを優先し、非 FAR はフォールバックとして扱う。
      */
-    private fun normalizeDirectionsForCrossFlick(
-        actionMap: Map<FlickDirection, FlickAction>
-    ): Map<FlickDirection, FlickAction> {
-        val result = mutableMapOf<FlickDirection, FlickAction>()
-        // 1パス目: *_FAR と無関係な方向をそのまま登録
-        for ((direction, action) in actionMap) {
-            val normalized = when (direction) {
-                FlickDirection.UP_LEFT_FAR, FlickDirection.UP_RIGHT_FAR -> direction
-                FlickDirection.UP_LEFT, FlickDirection.UP_RIGHT -> null // 2パス目で処理
-                else -> direction
-            }
-            if (normalized != null) result[normalized] = action
+    private fun resolvePopupStyle(keyData: KeyData): PopupStyle {
+        if (keyData.popupStyle == PopupStyle.CIRCLE) {
+            return PopupStyle.CIRCLE
         }
-        // 2パス目: UP_LEFT/UP_RIGHT を *_FAR のフォールバックとして登録（既存の *_FAR を上書きしない）
-        for ((direction, action) in actionMap) {
-            val normalized = when (direction) {
-                FlickDirection.UP_LEFT -> FlickDirection.UP_LEFT_FAR
-                FlickDirection.UP_RIGHT -> FlickDirection.UP_RIGHT_FAR
-                else -> null
-            }
-            if (normalized != null) result.putIfAbsent(normalized, action)
+        // popupStyle移行前の互換: STANDARD_FLICKはCIRCLE相当として扱う。
+        if (keyData.keyType == KeyType.STANDARD_FLICK) {
+            return PopupStyle.CIRCLE
         }
-        return result
+        return PopupStyle.GRID
+    }
+
+    private fun isCirclePopupStyle(keyData: KeyData): Boolean {
+        return resolvePopupStyle(keyData) == PopupStyle.CIRCLE
     }
 
     private fun getGuideLabels(stringMap: Map<FlickDirection, String>): AutoSizeButton.FlickGuideLabels {
@@ -700,7 +687,7 @@ class FlickKeyboardView @JvmOverloads constructor(
                                 com.kazumaproject.core.R.drawable.ten_keys_side_bg_material_light
                             }
                         )
-                    } else if (keyData.keyType != KeyType.STANDARD_FLICK) {
+                    } else if (!isCirclePopupStyle(keyData)) {
                         ContextCompat.getDrawable(
                             context,
                             if (isDarkTheme) {
@@ -775,7 +762,7 @@ class FlickKeyboardView @JvmOverloads constructor(
         val baseHorizontalMarginDp: Int
         val baseVerticalMarginDp: Int
 
-        if (keyData.keyType == KeyType.STANDARD_FLICK) {
+        if (isCirclePopupStyle(keyData)) {
             baseHorizontalMarginDp = 6
             baseVerticalMarginDp = 9
         } else if (keyData.isSpecialKey) {
@@ -848,6 +835,89 @@ class FlickKeyboardView @JvmOverloads constructor(
         stateList.addState(intArrayOf(), idleLayer)
 
         return stateList
+    }
+
+    private fun applyCircleFlickVisualStyle(
+        keyView: Button,
+        keyData: KeyData,
+        isDarkTheme: Boolean
+    ): SegmentedBackgroundDrawable {
+        val label = keyData.label
+        val segmentedDrawable: SegmentedBackgroundDrawable
+
+        if (themeMode == "custom") {
+            if (customBorderEnable) {
+                keyView.backgroundTintList = null
+
+                val baseCorner = dpToPx(8).toFloat()
+                val baseWithBorder = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = baseCorner
+                    setColor(customKeyColor)
+                    setStroke(borderWidth, customBorderColor)
+                }
+
+                segmentedDrawable = SegmentedBackgroundDrawable(
+                    label = label,
+                    baseColor = Color.TRANSPARENT,
+                    highlightColor = manipulateColor(customKeyColor, 1.2f),
+                    textColor = customKeyTextColor,
+                    cornerRadius = baseCorner
+                )
+
+                val layer = LayerDrawable(arrayOf(baseWithBorder, segmentedDrawable))
+                val inset = dpToPx(2)
+                layer.setLayerInset(1, inset, inset, inset, inset)
+
+                keyView.background = layer
+                keyView.setTextColor(Color.TRANSPARENT)
+            } else {
+                val neumorphDrawable = getDynamicNeumorphDrawable(
+                    baseColor = customKeyColor,
+                    radius = dpToPx(8).toFloat()
+                )
+
+                segmentedDrawable = SegmentedBackgroundDrawable(
+                    label = label,
+                    baseColor = Color.TRANSPARENT,
+                    highlightColor = manipulateColor(customKeyColor, 1.2f),
+                    textColor = customKeyTextColor,
+                    cornerRadius = dpToPx(8).toFloat()
+                )
+
+                val layerDrawable = LayerDrawable(arrayOf(neumorphDrawable, segmentedDrawable))
+                val inset = dpToPx(2)
+                layerDrawable.setLayerInset(1, inset, inset, inset, inset)
+                keyView.background = layerDrawable
+                keyView.setTextColor(Color.TRANSPARENT)
+            }
+        } else {
+            val keyBaseColor = if (isDarkTheme) {
+                context.getColorFromAttr(R.attr.colorSurfaceContainerHighest)
+            } else {
+                context.getColorFromAttr(R.attr.colorSurface)
+            }
+
+            val keyHighlightColor = context.getColorFromAttr(R.attr.colorSecondaryContainer)
+            val keyTextColor = context.getColorFromAttr(R.attr.colorOnSurface)
+
+            segmentedDrawable = SegmentedBackgroundDrawable(
+                label = label,
+                baseColor = keyBaseColor,
+                highlightColor = keyHighlightColor,
+                textColor = keyTextColor,
+                cornerRadius = 20f
+            )
+
+            keyView.background = segmentedDrawable
+            keyView.setTextColor(Color.TRANSPARENT)
+        }
+
+        if (liquidGlassEnable) {
+            keyView.setDrawableAlpha(liquidGlassKeyAlphaEnable)
+        }
+
+        return segmentedDrawable
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -987,308 +1057,140 @@ class FlickKeyboardView @JvmOverloads constructor(
                 }
             }
 
-            /** PETALは非推奨、CROSSのエイリアス */
-            KeyType.CROSS_FLICK, KeyType.PETAL_FLICK -> {
+            /** PETALは非推奨、CROSSのエイリアス。STANDARD_FLICK も popupStyle でここへ統合。 */
+            KeyType.CROSS_FLICK, KeyType.PETAL_FLICK, KeyType.STANDARD_FLICK -> {
                 val rawFlickActionMap = layout.flickKeyMaps[keyData.label]?.firstOrNull()
-                Log.d("FlickKeyboardView KeyType.CROSS_FLICK", "$rawFlickActionMap")
-                val flickActionMap = rawFlickActionMap?.let { normalizeDirectionsForCrossFlick(it) }
+                Log.d("FlickKeyboardView KeyType.FLICK", "${keyData.keyType}: $rawFlickActionMap")
+                val flickActionMap = rawFlickActionMap
+
                 if (flickActionMap != null) {
-                    val controller = GridFlickInputController(context, flickSensitivity).apply {
-                        setLongPressTimeout(longPressTimeout)
-                        val isDarkTheme = context.isDarkThemeOn()
-                        val secondaryColor =
-                            context.getColorFromAttr(R.attr.colorSecondaryContainer)
-                        val surfaceContainerLow =
-                            context.getColorFromAttr(R.attr.colorSurfaceContainerLow)
-                        val surfaceContainerHighest =
-                            if (isDarkTheme) {
-                                context.getColorFromAttr(R.attr.colorSurfaceContainerHighest)
-                            } else {
-                                context.getColorFromAttr(R.attr.colorSurface)
+                    val isDarkTheme = context.isDarkThemeOn()
+                    val secondaryColor =
+                        context.getColorFromAttr(R.attr.colorSecondaryContainer)
+                    val surfaceContainerLow =
+                        context.getColorFromAttr(R.attr.colorSurfaceContainerLow)
+                    val surfaceContainerHighest =
+                        if (isDarkTheme) {
+                            context.getColorFromAttr(R.attr.colorSurfaceContainerHighest)
+                        } else {
+                            context.getColorFromAttr(R.attr.colorSurface)
+                        }
+                    val textColor =
+                        context.getColor(com.kazumaproject.core.R.color.keyboard_icon_color)
+
+                    val dynamicColorTheme = when (themeMode) {
+                        "default" -> FlickPopupColorTheme(
+                            segmentColor = surfaceContainerHighest,
+                            segmentHighlightGradientStartColor = secondaryColor,
+                            segmentHighlightGradientEndColor = secondaryColor,
+                            centerGradientStartColor = surfaceContainerHighest,
+                            centerGradientEndColor = surfaceContainerLow,
+                            centerHighlightGradientStartColor = secondaryColor,
+                            centerHighlightGradientEndColor = secondaryColor,
+                            separatorColor = textColor,
+                            textColor = textColor
+                        )
+
+                        "custom" -> FlickPopupColorTheme(
+                            segmentColor = customSpecialKeyColor,
+                            segmentHighlightGradientStartColor = customSpecialKeyColor,
+                            segmentHighlightGradientEndColor = customSpecialKeyColor,
+                            centerGradientStartColor = manipulateColor(
+                                customSpecialKeyColor,
+                                1.2f
+                            ),
+                            centerGradientEndColor = manipulateColor(
+                                customSpecialKeyColor,
+                                0.8f
+                            ),
+                            centerHighlightGradientStartColor = manipulateColor(
+                                customSpecialKeyColor,
+                                1.2f
+                            ),
+                            centerHighlightGradientEndColor = manipulateColor(
+                                customSpecialKeyColor,
+                                0.8f
+                            ),
+                            separatorColor = customSpecialKeyTextColor,
+                            textColor = customSpecialKeyTextColor
+                        )
+
+                        else -> FlickPopupColorTheme(
+                            segmentColor = surfaceContainerHighest,
+                            segmentHighlightGradientStartColor = secondaryColor,
+                            segmentHighlightGradientEndColor = secondaryColor,
+                            centerGradientStartColor = surfaceContainerHighest,
+                            centerGradientEndColor = surfaceContainerLow,
+                            centerHighlightGradientStartColor = secondaryColor,
+                            centerHighlightGradientEndColor = secondaryColor,
+                            separatorColor = textColor,
+                            textColor = textColor
+                        )
+                    }
+
+                    val flickListener = object : GridFlickInputController.GridFlickListener {
+                        override fun onPress(action: FlickAction) {
+                            when (action) {
+                                is FlickAction.Input -> notifyTextPress(action.char)
+                                is FlickAction.Action -> this@FlickKeyboardView.listener?.onPress(action.action)
                             }
-                        val textColor =
-                            context.getColor(com.kazumaproject.core.R.color.keyboard_icon_color)
-
-                        val dynamicColorTheme = when (themeMode) {
-                            "default" -> FlickPopupColorTheme(
-                                segmentColor = surfaceContainerHighest,
-                                segmentHighlightGradientStartColor = secondaryColor,
-                                segmentHighlightGradientEndColor = secondaryColor,
-                                centerGradientStartColor = surfaceContainerHighest,
-                                centerGradientEndColor = surfaceContainerLow,
-                                centerHighlightGradientStartColor = secondaryColor,
-                                centerHighlightGradientEndColor = secondaryColor,
-                                separatorColor = textColor,
-                                textColor = textColor
-                            )
-
-                            "custom" -> FlickPopupColorTheme(
-                                segmentColor = customSpecialKeyColor,
-                                segmentHighlightGradientStartColor = customSpecialKeyColor,
-                                segmentHighlightGradientEndColor = customSpecialKeyColor,
-                                centerGradientStartColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    1.2f
-                                ),
-                                centerGradientEndColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    0.8f
-                                ),
-                                centerHighlightGradientStartColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    1.2f
-                                ),
-                                centerHighlightGradientEndColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    0.8f
-                                ),
-                                separatorColor = customSpecialKeyTextColor,
-                                textColor = customSpecialKeyTextColor
-                            )
-
-                            else -> FlickPopupColorTheme(
-                                segmentColor = surfaceContainerHighest,
-                                segmentHighlightGradientStartColor = secondaryColor,
-                                segmentHighlightGradientEndColor = secondaryColor,
-                                centerGradientStartColor = surfaceContainerHighest,
-                                centerGradientEndColor = surfaceContainerLow,
-                                centerHighlightGradientStartColor = secondaryColor,
-                                centerHighlightGradientEndColor = secondaryColor,
-                                separatorColor = textColor,
-                                textColor = textColor
-                            )
                         }
 
-                        setPopupColors(dynamicColorTheme)
-                        elevation = 1f
-
-                        this.listener = object : GridFlickInputController.GridFlickListener {
-                            override fun onPress(action: FlickAction) {
-                                when (action) {
-                                    is FlickAction.Input -> notifyTextPress(action.char)
-                                    is FlickAction.Action -> this@FlickKeyboardView.listener?.onPress(action.action)
-                                }
+                        override fun onFlick(action: FlickAction, isFlick: Boolean) {
+                            val keyAction = when (action) {
+                                is FlickAction.Input -> KeyAction.Text(action.char)
+                                is FlickAction.Action -> action.action
                             }
+                            this@FlickKeyboardView.listener?.onAction(keyAction, isFlick = isFlick)
+                        }
 
-                            override fun onFlick(action: FlickAction, isFlick: Boolean) {
-                                val keyAction = when (action) {
-                                    is FlickAction.Input -> KeyAction.Text(action.char)
-                                    is FlickAction.Action -> action.action
-                                }
-                                this@FlickKeyboardView.listener?.onAction(
-                                    keyAction,
-                                    isFlick = isFlick
+                        override fun onLongPress(action: FlickAction) {
+                            if (action is FlickAction.Action) {
+                                this@FlickKeyboardView.listener?.onFlickActionLongPress(action.action)
+                            }
+                        }
+
+                        override fun onUpAfterLongPress(action: FlickAction, isFlick: Boolean) {
+                            if (action is FlickAction.Action) {
+                                this@FlickKeyboardView.listener?.onFlickActionUpAfterLongPress(
+                                    action.action,
+                                    isFlick
                                 )
                             }
+                        }
+                    }
 
-                            override fun onLongPress(action: FlickAction) {
-                                if (action is FlickAction.Action) {
-                                    this@FlickKeyboardView.listener?.onFlickActionLongPress(
-                                        action.action
-                                    )
-                                }
-                            }
+                    val stringMap = extractInputMap(flickActionMap)
+                    if (keyView is AutoSizeButton) {
+                        applyGuideLabels(keyView, keyData, stringMap)
+                    }
 
-                            override fun onUpAfterLongPress(
-                                action: FlickAction,
-                                isFlick: Boolean
-                            ) {
-                                if (action is FlickAction.Action) {
-                                    this@FlickKeyboardView.listener?.onFlickActionUpAfterLongPress(
-                                        action.action,
-                                        isFlick
-                                    )
-                                }
-                            }
+                    if (resolvePopupStyle(keyData) == PopupStyle.CIRCLE && keyView is Button) {
+                        val segmentedDrawable = applyCircleFlickVisualStyle(
+                            keyView = keyView,
+                            keyData = keyData,
+                            isDarkTheme = isDarkTheme
+                        )
+
+                        val controller = StandardFlickInputController(context, flickSensitivity).apply {
+                            this.listener = flickListener
+                            setPopupColors(dynamicColorTheme)
+                            attach(keyView, flickActionMap, segmentedDrawable)
                         }
 
-                        val stringMap = extractInputMap(flickActionMap)
+                        gridFlickControllers.add(controller)
+                        return controller
+                    }
 
-                        if (keyView is AutoSizeButton) {
-                            applyGuideLabels(keyView, keyData, stringMap)
-                        }
-
+                    val controller = GridFlickInputController(context, flickSensitivity).apply {
+                        setLongPressTimeout(longPressTimeout)
+                        setPopupColors(dynamicColorTheme)
+                        elevation = 1f
+                        this.listener = flickListener
                         attach(keyView, flickActionMap)
                     }
 
                     gridFlickControllers.add(controller)
-                    return controller
-                }
-            }
-
-            KeyType.STANDARD_FLICK -> {
-                val flickActionMap = layout.flickKeyMaps[keyData.label]?.firstOrNull()
-                if (flickActionMap != null && keyView is Button) {
-                    val label = keyData.label
-                    val isDarkTheme = context.isDarkThemeOn()
-
-                    val segmentedDrawable: SegmentedBackgroundDrawable
-
-                    if (themeMode == "custom") {
-                        if (customBorderEnable) {
-                            keyView.backgroundTintList = null
-
-                            val baseCorner = dpToPx(8).toFloat()
-                            val baseWithBorder = GradientDrawable().apply {
-                                shape = GradientDrawable.RECTANGLE
-                                cornerRadius = baseCorner
-                                setColor(customKeyColor)
-                                setStroke(borderWidth, customBorderColor)
-                            }
-
-                            segmentedDrawable = SegmentedBackgroundDrawable(
-                                label = label,
-                                baseColor = Color.TRANSPARENT,
-                                highlightColor = manipulateColor(customKeyColor, 1.2f),
-                                textColor = customKeyTextColor,
-                                cornerRadius = baseCorner
-                            )
-
-                            val layer = LayerDrawable(arrayOf(baseWithBorder, segmentedDrawable))
-                            val inset = dpToPx(2)
-                            layer.setLayerInset(1, inset, inset, inset, inset)
-
-                            keyView.background = layer
-                            keyView.setTextColor(Color.TRANSPARENT)
-                        } else {
-                            val neumorphDrawable = getDynamicNeumorphDrawable(
-                                baseColor = customKeyColor,
-                                radius = dpToPx(8).toFloat()
-                            )
-
-                            segmentedDrawable = SegmentedBackgroundDrawable(
-                                label = label,
-                                baseColor = Color.TRANSPARENT,
-                                highlightColor = manipulateColor(customKeyColor, 1.2f),
-                                textColor = customKeyTextColor,
-                                cornerRadius = dpToPx(8).toFloat()
-                            )
-
-                            val layerDrawable =
-                                LayerDrawable(arrayOf(neumorphDrawable, segmentedDrawable))
-                            val inset = dpToPx(2)
-                            layerDrawable.setLayerInset(1, inset, inset, inset, inset)
-                            keyView.background = layerDrawable
-                            keyView.setTextColor(Color.TRANSPARENT)
-                        }
-                    } else {
-                        val keyBaseColor =
-                            if (isDarkTheme) {
-                                context.getColorFromAttr(R.attr.colorSurfaceContainerHighest)
-                            } else {
-                                context.getColorFromAttr(R.attr.colorSurface)
-                            }
-
-                        val keyHighlightColor =
-                            context.getColorFromAttr(R.attr.colorSecondaryContainer)
-                        val keyTextColor =
-                            context.getColorFromAttr(R.attr.colorOnSurface)
-
-                        segmentedDrawable = SegmentedBackgroundDrawable(
-                            label = label,
-                            baseColor = keyBaseColor,
-                            highlightColor = keyHighlightColor,
-                            textColor = keyTextColor,
-                            cornerRadius = 20f
-                        )
-
-                        keyView.background = segmentedDrawable
-                        keyView.setTextColor(Color.TRANSPARENT)
-                    }
-
-                    if (liquidGlassEnable) {
-                        keyView.setDrawableAlpha(liquidGlassKeyAlphaEnable)
-                    }
-
-                    val controller = StandardFlickInputController(context).apply {
-                        this.listener =
-                            object : StandardFlickInputController.StandardFlickListener {
-                                override fun onPress(character: String) {
-                                    notifyTextPress(character)
-                                }
-
-                                override fun onFlick(character: String) {
-                                    this@FlickKeyboardView.listener?.onAction(
-                                        KeyAction.Text(character),
-                                        isFlick = true
-                                    )
-                                }
-                            }
-
-                        val stringMap = extractInputMap(flickActionMap)
-
-                        if (keyView is AutoSizeButton) {
-                            applyGuideLabels(keyView, keyData, stringMap)
-                        }
-
-                        val secondaryColor =
-                            context.getColorFromAttr(R.attr.colorSecondaryContainer)
-                        val surfaceContainerLow =
-                            context.getColorFromAttr(R.attr.colorSurfaceContainerLow)
-                        val surfaceContainerHighest =
-                            if (isDarkTheme) {
-                                context.getColorFromAttr(R.attr.colorSurfaceContainerHighest)
-                            } else {
-                                context.getColorFromAttr(R.attr.colorSurface)
-                            }
-                        val textColor =
-                            context.getColor(com.kazumaproject.core.R.color.keyboard_icon_color)
-
-                        val dynamicColorTheme = when (themeMode) {
-                            "default" -> FlickPopupColorTheme(
-                                segmentColor = surfaceContainerHighest,
-                                segmentHighlightGradientStartColor = secondaryColor,
-                                segmentHighlightGradientEndColor = secondaryColor,
-                                centerGradientStartColor = surfaceContainerHighest,
-                                centerGradientEndColor = surfaceContainerLow,
-                                centerHighlightGradientStartColor = secondaryColor,
-                                centerHighlightGradientEndColor = secondaryColor,
-                                separatorColor = textColor,
-                                textColor = textColor
-                            )
-
-                            "custom" -> FlickPopupColorTheme(
-                                segmentColor = customSpecialKeyColor,
-                                segmentHighlightGradientStartColor = customSpecialKeyColor,
-                                segmentHighlightGradientEndColor = customSpecialKeyColor,
-                                centerGradientStartColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    1.2f
-                                ),
-                                centerGradientEndColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    0.8f
-                                ),
-                                centerHighlightGradientStartColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    1.2f
-                                ),
-                                centerHighlightGradientEndColor = manipulateColor(
-                                    customSpecialKeyColor,
-                                    0.8f
-                                ),
-                                separatorColor = customSpecialKeyTextColor,
-                                textColor = customSpecialKeyTextColor
-                            )
-
-                            else -> FlickPopupColorTheme(
-                                segmentColor = surfaceContainerHighest,
-                                segmentHighlightGradientStartColor = secondaryColor,
-                                segmentHighlightGradientEndColor = secondaryColor,
-                                centerGradientStartColor = surfaceContainerHighest,
-                                centerGradientEndColor = surfaceContainerLow,
-                                centerHighlightGradientStartColor = secondaryColor,
-                                centerHighlightGradientEndColor = secondaryColor,
-                                separatorColor = textColor,
-                                textColor = textColor
-                            )
-                        }
-
-                        setPopupColors(dynamicColorTheme)
-                        attach(keyView, stringMap, segmentedDrawable)
-                    }
-
-                    standardFlickControllers.add(controller)
                     return controller
                 }
             }
@@ -1530,11 +1432,6 @@ class FlickKeyboardView @JvmOverloads constructor(
             is CustomAngleFlickController -> {
                 controller.cancel()
                 flickControllers.remove(controller)
-            }
-
-            is StandardFlickInputController -> {
-                controller.cancel()
-                standardFlickControllers.remove(controller)
             }
 
             is GridFlickInputController -> {
@@ -1898,7 +1795,6 @@ class FlickKeyboardView @JvmOverloads constructor(
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         flickControllers.forEach { it.cancel() }
-        standardFlickControllers.forEach { it.cancel() }
         gridFlickControllers.forEach { it.cancel() }
         tfbiControllers.forEach { it.cancel() }
         stickyTfbiControllers.forEach { it.cancel() }

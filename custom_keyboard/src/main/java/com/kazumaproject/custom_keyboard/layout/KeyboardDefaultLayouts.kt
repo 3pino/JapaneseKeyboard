@@ -6,6 +6,7 @@ import com.kazumaproject.custom_keyboard.data.KeyAction
 import com.kazumaproject.custom_keyboard.data.KeyData
 import com.kazumaproject.custom_keyboard.data.KeyMode
 import com.kazumaproject.custom_keyboard.data.KeyType
+import com.kazumaproject.custom_keyboard.data.PopupStyle
 import com.kazumaproject.custom_keyboard.data.KeyboardInputMode
 import com.kazumaproject.custom_keyboard.data.KeyboardLayout
 import com.kazumaproject.custom_keyboard.data.TfbiFlickNode
@@ -3203,55 +3204,64 @@ object KeyboardDefaultLayouts {
                 0,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "か",
                 0,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "さ",
                 0,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "た",
                 1,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "な",
                 1,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "は",
                 1,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "ま",
                 2,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "や",
                 2,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "ら",
                 2,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 dakutenToggleStates[0].label ?: "",
                 3,
@@ -3266,13 +3276,15 @@ object KeyboardDefaultLayouts {
                 3,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "、。?!",
                 3,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "Del",
                 0,
@@ -3491,34 +3503,34 @@ object KeyboardDefaultLayouts {
                 row = 0,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "4",
                 row = 1,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "7",
                 row = 2,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = ",",
                 row = 3,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
-                "2", 0, 1, false, keyType = KeyType.STANDARD_FLICK
+                "2", 0, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
-                "3", 0, 2, false, keyType = KeyType.STANDARD_FLICK
+                "3", 0, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "",
@@ -3531,8 +3543,8 @@ object KeyboardDefaultLayouts {
                 keyType = KeyType.NORMAL,
                 keyId = "switch_next_ime"
             ),
-            KeyData("5", 1, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData("6", 1, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("5", 1, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData("6", 1, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 "",
                 1,
@@ -3544,8 +3556,8 @@ object KeyboardDefaultLayouts {
                 rowSpan = 1,
                 keyType = KeyType.NORMAL
             ),
-            KeyData("8", 2, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData("9", 2, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("8", 2, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData("9", 2, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 "",
                 2,
@@ -3557,8 +3569,8 @@ object KeyboardDefaultLayouts {
                 drawableResId = com.kazumaproject.core.R.drawable.backspace_24px,
                 keyType = KeyType.NORMAL
             ),
-            KeyData("0", 3, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData(".", 3, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("0", 3, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData(".", 3, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 label = enterKeyStates[0].label ?: "",
                 row = 3,
@@ -3649,55 +3661,64 @@ object KeyboardDefaultLayouts {
                 0,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "か",
                 0,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "さ",
                 0,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "た",
                 1,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "な",
                 1,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "は",
                 1,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "ま",
                 2,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "や",
                 2,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "ら",
                 2,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 dakutenToggleStates[1].label ?: "",
                 3,
@@ -3712,13 +3733,15 @@ object KeyboardDefaultLayouts {
                 3,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "、。?!",
                 3,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), // Label fixed to match map key
             KeyData(
                 "Del",
@@ -3952,55 +3975,64 @@ object KeyboardDefaultLayouts {
                 0,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "ABC",
                 0,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "DEF",
                 0,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "GHI",
                 1,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "JKL",
                 1,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "MNO",
                 1,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "PQRS",
                 2,
                 1,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "TUV",
                 2,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "WXYZ",
                 2,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "a/A", 3, 1, false, action = KeyAction.ToggleCase, isSpecialKey = false
             ), KeyData(
@@ -4008,13 +4040,15 @@ object KeyboardDefaultLayouts {
                 3,
                 2,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 ". , ? !",
                 3,
                 3,
                 true,
-                keyType = if (isDefaultKey) KeyType.CROSS_FLICK else KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK,
+                popupStyle = if (isDefaultKey) PopupStyle.GRID else PopupStyle.CIRCLE
             ), KeyData(
                 "Del",
                 0,
@@ -4175,34 +4209,34 @@ object KeyboardDefaultLayouts {
                 row = 0,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "4",
                 row = 1,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "7",
                 row = 2,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = ",",
                 row = 3,
                 column = 0,
                 isFlickable = false,
-                keyType = KeyType.STANDARD_FLICK
+                keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
-                "2", 0, 1, false, keyType = KeyType.STANDARD_FLICK
+                "2", 0, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
-                "3", 0, 2, false, keyType = KeyType.STANDARD_FLICK
+                "3", 0, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE
             ),
             KeyData(
                 label = "",
@@ -4215,8 +4249,8 @@ object KeyboardDefaultLayouts {
                 keyType = KeyType.NORMAL,
                 keyId = "switch_next_ime"
             ),
-            KeyData("5", 1, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData("6", 1, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("5", 1, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData("6", 1, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 "",
                 1,
@@ -4228,8 +4262,8 @@ object KeyboardDefaultLayouts {
                 rowSpan = 1,
                 keyType = KeyType.NORMAL
             ),
-            KeyData("8", 2, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData("9", 2, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("8", 2, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData("9", 2, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 "",
                 2,
@@ -4241,8 +4275,8 @@ object KeyboardDefaultLayouts {
                 drawableResId = com.kazumaproject.core.R.drawable.backspace_24px,
                 keyType = KeyType.NORMAL
             ),
-            KeyData("0", 3, 1, false, keyType = KeyType.STANDARD_FLICK),
-            KeyData(".", 3, 2, false, keyType = KeyType.STANDARD_FLICK),
+            KeyData("0", 3, 1, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
+            KeyData(".", 3, 2, false, keyType = KeyType.CROSS_FLICK, popupStyle = PopupStyle.CIRCLE),
             KeyData(
                 label = "",
                 row = 3,
@@ -4331,84 +4365,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "あ", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "か", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "さ", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "た", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "な", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "は", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ま", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "や", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ら", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 dakutenToggleStates[0].label ?: "",
                 3,
@@ -4421,21 +4464,23 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "わ", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "、。?!", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -5247,82 +5292,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "@#/_", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ABC", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "DEF", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "GHI", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "JKL", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "MNO", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "PQRS", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "TUV", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "WXYZ", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "a/A", 3, 1, false, action = KeyAction.ToggleCase, isSpecialKey = false
             ), KeyData(
                 "' \" ( )", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 ". , ? !", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -5591,73 +5647,83 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "1\n☆♪→", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "2\n￥$€", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "3\n%°#", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "4\n○*・", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "5\n+x÷", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "6\n< = >", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "7\n「」:", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "8\n〒々〆", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "9\n^|\\", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "0\n〜…", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "( ) [ ]",
                 3,
@@ -5667,17 +5733,19 @@ object KeyboardDefaultLayouts {
                 colSpan = 1,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 ".,-/", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -6033,84 +6101,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "あ", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "か", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "さ", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "た", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "な", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "は", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ま", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "や", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ら", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 dakutenToggleStates[0].label ?: "",
                 3,
@@ -6123,21 +6200,23 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "わ", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "、。?!", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -6922,82 +7001,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "@#/_", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ABC", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "DEF", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "GHI", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "JKL", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "MNO", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "PQRS", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "TUV", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "WXYZ", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "a/A", 3, 1, false, action = KeyAction.ToggleCase, isSpecialKey = false
             ), KeyData(
                 "' \" ( )", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 ". , ? !", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -7259,82 +7349,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "@#/_", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ABC", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "DEF", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "GHI", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "JKL", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "MNO", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "PQRS", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "TUV", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "WXYZ", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "a/A", 3, 1, false, action = KeyAction.ToggleCase, isSpecialKey = false
             ), KeyData(
                 "' \" ( )", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 ". , ? !", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -7617,73 +7718,83 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "1\n☆♪→", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "2\n￥$€", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "3\n%°#", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "4\n○*・", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "5\n+x÷", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "6\n< = >", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "7\n「」:", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "8\n〒々〆", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "9\n^|\\", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "0\n〜…", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "( ) [ ]",
                 3,
@@ -7693,17 +7804,19 @@ object KeyboardDefaultLayouts {
                 colSpan = 1,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 ".,-/", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -8057,84 +8170,93 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "あ", 0, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "か", 0, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "さ", 0, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "た", 1, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "な", 1, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "は", 1, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ま", 2, 1, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "や", 2, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "ら", 2, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 dakutenToggleStates[0].label ?: "",
                 3,
@@ -8147,21 +8269,23 @@ object KeyboardDefaultLayouts {
             ), KeyData(
                 "わ", 3, 2, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), KeyData(
                 "、。?!", 3, 3, true, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "second-flick" -> KeyType.TWO_STEP_FLICK
                     "third-flick" -> KeyType.HIERARCHICAL_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ), if (isFlickDeleteEnabled) {
                 KeyData(
                     "Del",
@@ -9021,10 +9145,11 @@ object KeyboardDefaultLayouts {
                 isFlickable = false,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 label = "4\n○*・",
@@ -9033,10 +9158,11 @@ object KeyboardDefaultLayouts {
                 isFlickable = false,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 label = "7\n「」:",
@@ -9045,10 +9171,11 @@ object KeyboardDefaultLayouts {
                 isFlickable = false,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 label = "@\n/~;",
@@ -9057,74 +9184,83 @@ object KeyboardDefaultLayouts {
                 isFlickable = false,
                 keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "2\n￥$€", 0, 2, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "3\n%°&", 0, 3, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "5\n+x÷", 1, 2, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "6\n< = >", 1, 3, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "8\n〒々〆", 2, 2, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "9\n^|\\", 2, 3, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "0\n〜…", 3, 2, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             KeyData(
                 "#\n.^,", 3, 3, false, keyType = when (inputStyle) {
                     "default" -> KeyType.CROSS_FLICK
-                    "circle" -> KeyType.STANDARD_FLICK
+                    "circle" -> KeyType.CROSS_FLICK
                     "sumire" -> KeyType.CIRCULAR_FLICK
                     else -> KeyType.CROSS_FLICK
-                }
+                },
+                popupStyle = if (inputStyle == "circle") PopupStyle.CIRCLE else PopupStyle.GRID
             ),
             if (isFlickDeleteEnabled) {
                 KeyData(

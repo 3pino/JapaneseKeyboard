@@ -2,142 +2,93 @@ package com.kazumaproject.custom_keyboard.controller
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Color
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
-import android.view.WindowManager
-import android.widget.PopupWindow
-import androidx.core.graphics.drawable.toDrawable
+import com.kazumaproject.custom_keyboard.data.FlickAction
 import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
 import com.kazumaproject.custom_keyboard.layout.SegmentedBackgroundDrawable
 import com.kazumaproject.custom_keyboard.view.StandardFlickPopupView
-import kotlin.math.sqrt
+import android.graphics.Color
+import android.view.Gravity
+import android.view.WindowManager
+import android.widget.PopupWindow
+import androidx.core.graphics.drawable.toDrawable
 
-class StandardFlickInputController(context: Context) {
+class StandardFlickInputController(
+    private val context: Context,
+    private val flickSensitivity: Int
+) : GridFlickInputController(context, flickSensitivity) {
 
-    interface StandardFlickListener {
-        fun onPress(character: String)
-        fun onFlick(character: String)
-    }
-
-    var listener: StandardFlickListener? = null
-    private var characterMap: Map<FlickDirection, String> = emptyMap()
-    private var anchorView: View? = null
-    private var segmentedDrawable: SegmentedBackgroundDrawable? = null
-
-    private var initialTouchX = 0f
-    private var initialTouchY = 0f
-    private val flickThreshold = 65f
-
-    private val popupWindow: PopupWindow
     private val popupView = StandardFlickPopupView(context)
-
-    private var popupBackgroundColor: Int = Color.WHITE
-    private var popupTextColor: Int = Color.BLACK
-    private var popupStrokeColor: Int = Color.LTGRAY
-
-    init {
-        popupWindow = PopupWindow(
-            popupView,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            false
-        ).apply {
-            setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
-            isClippingEnabled = false
-            elevation = 8f
-            animationStyle = 0
-            enterTransition = null
-            exitTransition = null
-        }
+    private val popupWindow: PopupWindow = PopupWindow(
+        popupView,
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        WindowManager.LayoutParams.WRAP_CONTENT,
+        false
+    ).apply {
+        setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
+        isClippingEnabled = false
+        elevation = 8f
+        animationStyle = 0
+        enterTransition = null
+        exitTransition = null
     }
 
-    fun setPopupColors(theme: FlickPopupColorTheme) {
-        this.popupBackgroundColor = theme.segmentHighlightGradientStartColor
-        this.popupTextColor = theme.textColor
-        this.popupStrokeColor = theme.separatorColor
+    private var popupTheme: FlickPopupColorTheme? = null
+
+    override fun setPopupColors(theme: FlickPopupColorTheme) {
+        super.setPopupColors(theme)
+        this.popupTheme = theme
+        popupView.setPopupColors(theme)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    fun attach(
-        button: View,
-        map: Map<FlickDirection, String>,
-        drawable: SegmentedBackgroundDrawable
-    ) {
-        val completeMap = mutableMapOf<FlickDirection, String>()
-        completeMap[FlickDirection.TAP] = map[FlickDirection.TAP] ?: ""
-        completeMap[FlickDirection.UP] = map[FlickDirection.UP] ?: ""
-        completeMap[FlickDirection.DOWN] = map[FlickDirection.DOWN] ?: ""
-        completeMap[FlickDirection.UP_LEFT_FAR] = map[FlickDirection.UP_LEFT_FAR]
-            ?: map.entries.find { it.key.name.contains("LEFT") }?.value ?: ""
-
-        completeMap[FlickDirection.UP_RIGHT_FAR] = map[FlickDirection.UP_RIGHT_FAR]
-            ?: map.entries.find { it.key.name.contains("RIGHT") }?.value ?: ""
-
-        this.characterMap = completeMap
-        this.segmentedDrawable = drawable
-        button.setOnTouchListener { v, event ->
-            handleTouchEvent(v, event)
-        }
+    override fun onActionDown(view: View) {
+        characterMap[FlickDirection.TAP]
+            ?.takeIf(::hasContent)
+            ?.let { listener?.onPress(it) }
+        segmentedDrawable?.highlightDirection = FlickDirection.TAP
+        showPopup(FlickDirection.TAP)
     }
 
-    private fun handleTouchEvent(view: View, event: MotionEvent): Boolean {
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                anchorView = view
-                initialTouchX = event.rawX
-                initialTouchY = event.rawY
-                listener?.onPress(characterMap[FlickDirection.TAP] ?: "")
-                segmentedDrawable?.highlightDirection = FlickDirection.TAP
-                showPopup(FlickDirection.TAP)
-                return true
-            }
+    override fun onActionMove(dx: Float, dy: Float, distance: Float, direction: FlickDirection) {
+        segmentedDrawable?.highlightDirection = direction
+        showPopup(direction)
+    }
 
-            MotionEvent.ACTION_MOVE -> {
-                val dx = event.rawX - initialTouchX
-                val dy = event.rawY - initialTouchY
-                val direction = calculateDirection(dx, dy)
-                segmentedDrawable?.highlightDirection = direction
-                showPopup(direction)
-                return true
-            }
-
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                segmentedDrawable?.highlightDirection = null
-                val dx = event.rawX - initialTouchX
-                val dy = event.rawY - initialTouchY
-                val finalDirection = calculateDirection(dx, dy)
-                characterMap[finalDirection]?.let {
-                    if (it.isNotEmpty()) {
-                        listener?.onFlick(it)
-                    }
-                }
-                dismissPopup()
-                return true
+    override fun onActionUp(finalDirection: FlickDirection) {
+        segmentedDrawable?.highlightDirection = finalDirection
+        if (characterMap[finalDirection]?.takeIf(::hasContent) != null) {
+            characterMap[finalDirection]?.let {
+                listener?.onFlick(it, isFlick = finalDirection != FlickDirection.TAP)
             }
         }
-        return false
     }
 
-    private fun showPopup(direction: FlickDirection) {
+    override fun onActionCancel() {
+        segmentedDrawable?.highlightDirection = null
+        dismissPopup()
+    }
+
+    override fun onActionUpEnd() {
+        segmentedDrawable?.highlightDirection = null
+        dismissPopup()
+    }
+
+    override fun showPopup(direction: FlickDirection) {
         val currentAnchor = anchorView ?: return
 
-        // ★★★ START: 修正箇所 ★★★
-        // PopupWindowを表示する前に、アンカービューがウィンドウにアタッチされているか必ず確認する。
-        // これで BadTokenException クラッシュを回避できる。
         if (!currentAnchor.isAttachedToWindow) {
             return
         }
-        // ★★★ END: 修正箇所 ★★★
 
-        popupView.setColors(popupBackgroundColor, popupTextColor, popupStrokeColor)
+        popupTheme?.let { popupView.setPopupColors(it) }
+        popupView.setFlickDirection(direction)
 
         if (direction == FlickDirection.TAP) {
-            popupView.updateMultiCharText(characterMap)
+            popupView.updateMultiCharText(toPopupTextMap())
         } else {
-            val text = characterMap[direction]
+            val text = actionToPopupText(characterMap[direction])
             popupView.updateText(text)
         }
 
@@ -160,29 +111,45 @@ class StandardFlickInputController(context: Context) {
         }
     }
 
-    private fun dismissPopup() {
+    override fun dismissPopup() {
         if (popupWindow.isShowing) {
             popupWindow.dismiss()
         }
     }
 
-    private fun calculateDirection(dx: Float, dy: Float): FlickDirection {
-        val distance = sqrt(dx * dx + dy * dy)
-        if (distance < flickThreshold) {
-            return FlickDirection.TAP
-        }
-
-        val angle = Math.toDegrees(kotlin.math.atan2(dy.toDouble(), dx.toDouble()))
-
-        return when {
-            angle > -45 && angle <= 45 -> FlickDirection.UP_RIGHT_FAR
-            angle > 45 && angle <= 135 -> FlickDirection.DOWN
-            angle < -45 && angle >= -135 -> FlickDirection.UP
-            else -> FlickDirection.UP_LEFT_FAR
-        }
-    }
-
-    fun cancel() {
+    override fun onLongPressTriggered(tapAction: FlickAction.Action?) {
         dismissPopup()
     }
+
+    override fun cancel() {
+        dismissPopup()
+        super.cancel()
+    }
+
+    private fun hasContent(action: FlickAction): Boolean {
+        return when (action) {
+            is FlickAction.Input -> action.char.isNotEmpty()
+            is FlickAction.Action -> true
+        }
+    }
+
+    private fun actionToPopupText(action: FlickAction?): String {
+        return when (action) {
+            is FlickAction.Input -> action.char
+            is FlickAction.Action -> action.label ?: ""
+            null -> ""
+        }
+    }
+
+    private fun toPopupTextMap(): Map<FlickDirection, String> {
+        return mapOf(
+            FlickDirection.TAP to actionToPopupText(characterMap[FlickDirection.TAP]),
+            FlickDirection.UP to actionToPopupText(characterMap[FlickDirection.UP]),
+            FlickDirection.UP_LEFT_FAR to actionToPopupText(characterMap[FlickDirection.UP_LEFT_FAR]),
+            FlickDirection.UP_RIGHT_FAR to actionToPopupText(characterMap[FlickDirection.UP_RIGHT_FAR]),
+            FlickDirection.DOWN to actionToPopupText(characterMap[FlickDirection.DOWN])
+        )
+    }
 }
+
+

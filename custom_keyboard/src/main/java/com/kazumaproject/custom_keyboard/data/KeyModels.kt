@@ -76,7 +76,8 @@ data class KeyData(
     val isSpecialKey: Boolean = false,
     val isHiLighted: Boolean = false,
     val keyId: String? = null,
-    val keyType: KeyType = if (isFlickable) KeyType.CIRCULAR_FLICK else KeyType.NORMAL
+    val keyType: KeyType = if (isFlickable) KeyType.CIRCULAR_FLICK else KeyType.NORMAL,
+    val popupStyle: PopupStyle = PopupStyle.GRID
 )
 
 
@@ -113,6 +114,11 @@ enum class KeyType {
     STICKY_TWO_STEP_FLICK,
 
     HIERARCHICAL_FLICK
+}
+
+enum class PopupStyle {
+    GRID,
+    CIRCLE
 }
 
 enum class ShapeType {
