@@ -477,6 +477,19 @@ class FlickKeyboardView @JvmOverloads constructor(
         }
     }
 
+    private fun extractTextLikeMap(actionMap: Map<FlickDirection, FlickAction>): Map<FlickDirection, String> {
+        return actionMap.mapValues { (_, flickAction) ->
+            when (flickAction) {
+                is FlickAction.Input -> flickAction.char
+                is FlickAction.Action -> when (val action = flickAction.action) {
+                    is KeyAction.Text -> action.text
+                    is KeyAction.InputText -> action.text
+                    else -> ""
+                }
+            }
+        }
+    }
+
     private fun getGuideLabels(stringMap: Map<FlickDirection, String>): AutoSizeButton.FlickGuideLabels {
         val tap = sanitizeGuideCharacter(stringMap[FlickDirection.TAP] ?: "") ?: ""
         val left = sanitizeGuideCharacter(
@@ -1287,16 +1300,16 @@ class FlickKeyboardView @JvmOverloads constructor(
                             }
                         }
 
-                        val stringMap = extractInputMap(flickActionMap)
+                        val guideTextMap = extractTextLikeMap(flickActionMap)
                         val longPressStringMap = layout.longPressFlickKeyMaps[keyData.keyId]
                             ?: layout.longPressFlickKeyMaps[keyData.label]
                             ?: emptyMap()
 
                         if (keyView is AutoSizeButton) {
-                            applyGuideLabels(keyView, keyData, stringMap)
+                            applyGuideLabels(keyView, keyData, guideTextMap)
                         }
 
-                        attachText(keyView, stringMap, longPressStringMap)
+                        attachTextActions(keyView, flickActionMap, longPressStringMap)
                     }
 
                     crossFlickControllers.add(controller)

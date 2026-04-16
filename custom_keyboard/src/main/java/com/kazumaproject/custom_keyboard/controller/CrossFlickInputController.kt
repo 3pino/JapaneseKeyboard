@@ -16,9 +16,8 @@ import com.kazumaproject.custom_keyboard.data.FlickAction
 import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
 import com.kazumaproject.custom_keyboard.data.KeyAction
-import com.kazumaproject.custom_keyboard.view.CrossFlickPopupView
 import com.kazumaproject.custom_keyboard.view.DirectionalKeyPopupView
-import com.kazumaproject.custom_keyboard.view.FlickGridPopupView
+import com.kazumaproject.custom_keyboard.view.CrossFlickPopupView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,22 +39,21 @@ class CrossFlickInputController(
         fun onFlickUpAfterLongPress(action: KeyAction, isFlick: Boolean)
     }
 
-    private enum class InputMode {
-        ACTION,
-        TEXT
+    private enum class PopupStyle {
+        ACTION_PREVIEW,
+        TEXT_GRID
     }
 
     var listener: CrossFlickListener? = null
 
-    private var inputMode: InputMode = InputMode.ACTION
+    private var popupStyle: PopupStyle = PopupStyle.ACTION_PREVIEW
     private var anchorView: View? = null
     private var initialTouchPoint = PointF(0f, 0f)
     private var currentDirection = FlickDirection.TAP
     private val flickThreshold = flickSensitivity.toFloat().coerceAtLeast(1f)
 
-    private var flickActionMap: Map<FlickDirection, FlickAction> = emptyMap()
-    private var textMap: Map<FlickDirection, String> = emptyMap()
-    private var longPressTextMap: Map<FlickDirection, String> = emptyMap()
+    private var baseActionMap: Map<FlickDirection, FlickAction> = emptyMap()
+    private var longPressActionMap: Map<FlickDirection, FlickAction> = emptyMap()
 
     private val actionPopupWindows = mutableMapOf<FlickDirection, PopupWindow>()
     private val actionPopupViews = mutableMapOf<FlickDirection, CrossFlickPopupView>()
@@ -66,7 +64,7 @@ class CrossFlickInputController(
     private var originalKeyText: CharSequence? = null
 
     private val gridPopup = PopupWindow(
-        FlickGridPopupView(context),
+        CrossFlickPopupView(context),
         WindowManager.LayoutParams.WRAP_CONTENT,
         WindowManager.LayoutParams.WRAP_CONTENT,
         false
@@ -108,25 +106,36 @@ class CrossFlickInputController(
     // ACTION モードでビューにアタッチする。CROSS_FLICK キー（アイコン付き特殊キー）向け。
     @SuppressLint("ClickableViewAccessibility")
     fun attach(view: View, map: Map<FlickDirection, FlickAction>) {
-        inputMode = InputMode.ACTION
-        flickActionMap = map
-        textMap = emptyMap()
-        longPressTextMap = emptyMap()
+        popupStyle = PopupStyle.ACTION_PREVIEW
+        baseActionMap = map
+        longPressActionMap = emptyMap()
         view.setOnTouchListener { v, event -> handleTouchEvent(v, event) }
     }
 
     // TEXT モードでビューにアタッチする。PETAL_FLICK キー（文字入力キー）向け。
-    // longPressMap を省略するとグリッドポップアップには通常 map の文字がそのまま表示される
+    // longPressMap を省略するとグリッドポップアップには通常 map の内容がそのまま表示される。
     @SuppressLint("ClickableViewAccessibility")
     fun attachText(
         view: View,
         map: Map<FlickDirection, String>,
         longPressMap: Map<FlickDirection, String> = emptyMap()
     ) {
-        inputMode = InputMode.TEXT
-        textMap = map
-        longPressTextMap = longPressMap
-        flickActionMap = emptyMap()
+        attachTextActions(
+            view = view,
+            map = map.toInputActionMap(),
+            longPressMap = longPressMap
+        )
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    fun attachTextActions(
+        view: View,
+        map: Map<FlickDirection, FlickAction>,
+        longPressMap: Map<FlickDirection, String> = emptyMap()
+    ) {
+        popupStyle = PopupStyle.TEXT_GRID
+        baseActionMap = map
+        longPressActionMap = longPressMap.toInputActionMap()
         view.setOnTouchListener { v, event -> handleTouchEvent(v, event) }
     }
 
@@ -143,7 +152,7 @@ class CrossFlickInputController(
                 initialTouchPoint.set(event.rawX, event.rawY)
                 currentDirection = FlickDirection.TAP
 
-                if (inputMode == InputMode.TEXT) {
+                if (popupStyle == PopupStyle.TEXT_GRID) {
                     (anchorView as? Button)?.let { button ->
                         originalKeyText = button.text
                         button.text = ""
@@ -202,91 +211,80 @@ class CrossFlickInputController(
     // 長押しタイマーが満了したときに呼ばれる。モードに応じてポップアップ表示を切り替える。
     // ACTION: 全方向のアクションポップアップを展開。TEXT: 方向ポップアップを閉じてグリッド表示に切り替える。
     private fun onLongPressTriggered() {
-        when (inputMode) {
-            InputMode.ACTION -> {
+        withPopupStyle(
+            onActionPreview = {
                 showAllActionPopups()
                 highlightActionPopup(currentDirection)
                 notifyLongPressActionPreview()
-            }
-
-            InputMode.TEXT -> {
+            },
+            onTextGrid = {
                 dismissDirectionalPopups()
                 showGridPopup()
                 highlightGrid(currentDirection)
             }
-        }
+        )
     }
 
     // ACTION_DOWN 時に listener へ押下通知を送る。TAP 方向のアクション／テキストを事前通知する。
     private fun notifyPressAction() {
-        when (inputMode) {
-            InputMode.ACTION -> {
-                resolveAction(FlickDirection.TAP)?.let {
-                    listener?.onPress(it.toKeyAction())
-                }
-            }
-
-            InputMode.TEXT -> {
-                val text = resolveText(FlickDirection.TAP, preferLongPress = false)
-                if (!text.isNullOrEmpty()) {
-                    listener?.onPress(KeyAction.Text(text))
-                }
-            }
+        resolveNormalized(FlickDirection.TAP, preferLongPress = false)?.let { normalized ->
+            listener?.onPress(normalized.commitAction)
         }
     }
 
     // ACTION_UP 時に確定処理を行う。長押し済みかどうかで呼ぶコールバックを切り替える。
     private fun commitAction() {
         val isFlick = currentDirection != FlickDirection.TAP
-        when (inputMode) {
-            InputMode.ACTION -> {
-                val flickActionToCommit = resolveAction(currentDirection)
+        withPopupStyle(
+            onActionPreview = {
+                val normalized = resolveNormalized(currentDirection, preferLongPress = false)
                 if (isLongPressTriggered) {
                     listener?.onFlickUpAfterLongPress(
-                        flickActionToCommit?.toKeyAction() ?: KeyAction.Cancel,
+                        normalized?.commitAction ?: KeyAction.Cancel,
                         isFlick
                     )
                 } else {
-                    flickActionToCommit?.let { listener?.onFlick(it.toKeyAction(), isFlick) }
+                    normalized?.let { listener?.onFlick(it.commitAction, isFlick) }
+                }
+            },
+            onTextGrid = {
+                resolveNormalized(
+                    direction = currentDirection,
+                    preferLongPress = isLongPressMode
+                )?.let { normalized ->
+                    listener?.onFlick(normalized.commitAction, isFlick)
                 }
             }
-
-            InputMode.TEXT -> {
-                val output = resolveText(currentDirection, preferLongPress = isLongPressMode)
-                if (!output.isNullOrEmpty()) {
-                    listener?.onFlick(KeyAction.Text(output), isFlick)
-                }
-            }
-        }
+        )
     }
 
     // 通常フリック中（長押し前）に方向が変わったときのポップアップ更新。ACTION_MOVE から呼ばれる。
     private fun updateNormalPopup(direction: FlickDirection) {
-        when (inputMode) {
-            InputMode.ACTION -> {
+        withPopupStyle(
+            onActionPreview = {
                 dismissAllActionPopups()
                 showActionPopup(direction, highlighted = true)
-            }
-
-            InputMode.TEXT -> showDirectionalPopup(direction)
-        }
+            },
+            onTextGrid = { showDirectionalPopup(direction) }
+        )
     }
 
     // 長押しモード中に指が動いたときのハイライト更新。ACTION_MOVE から呼ばれる。
     private fun updateLongPressHighlight(direction: FlickDirection) {
-        when (inputMode) {
-            InputMode.ACTION -> {
+        withPopupStyle(
+            onActionPreview = {
                 highlightActionPopup(direction)
                 notifyLongPressActionPreview()
-            }
-
-            InputMode.TEXT -> highlightGrid(direction)
-        }
+            },
+            onTextGrid = { highlightGrid(direction) }
+        )
     }
 
     // ACTION モードの長押し中、現在ハイライトされている方向のアクションを listener へプレビュー通知する。
     private fun notifyLongPressActionPreview() {
-        resolveAction(currentDirection)?.let { listener?.onFlickLongPress(it.toKeyAction()) }
+        resolveNormalized(currentDirection, preferLongPress = false)?.let { normalized ->
+            listener?.onFlickLongPress(normalized.commitAction)
+        }
     }
 
     // 初期タッチ位置からの差分を FlickDirection に変換する。両軸が閾値未満なら TAP とみなす。
@@ -306,10 +304,30 @@ class CrossFlickInputController(
         }
     }
 
-    // FlickDirection を候補リストに展開して flickActionMap を引く。near/far 両方に対応する。
-    private fun resolveAction(direction: FlickDirection): FlickAction? {
+    private data class NormalizedFlick(
+        val commitAction: KeyAction,
+        val displayText: String?,
+        val displayLabel: String?,
+        val drawableResId: Int?
+    )
+
+    // FlickDirection を候補リストに展開して FlickAction を解決する。preferLongPress=true のとき長押しマップを優先する。
+    private fun resolveFlickAction(
+        direction: FlickDirection,
+        preferLongPress: Boolean
+    ): FlickAction? {
+        if (preferLongPress) {
+            resolveFlickActionFromMap(direction, longPressActionMap)?.let { return it }
+        }
+        return resolveFlickActionFromMap(direction, baseActionMap)
+    }
+
+    private fun resolveFlickActionFromMap(
+        direction: FlickDirection,
+        source: Map<FlickDirection, FlickAction>
+    ): FlickAction? {
         for (candidate in getDirectionCandidates(direction)) {
-            val action = flickActionMap[candidate]
+            val action = source[candidate]
             if (action != null) {
                 return action
             }
@@ -317,29 +335,26 @@ class CrossFlickInputController(
         return null
     }
 
-    // FlickDirection に対応する出力テキストを解決する。preferLongPress=true のとき longPressTextMap を優先する。
-    private fun resolveText(
+    // commit 用の正規化入力を解決する。preferLongPress=true のとき長押しマップを優先する。
+    private fun resolveNormalized(
         direction: FlickDirection,
         preferLongPress: Boolean
-    ): String? {
+    ): NormalizedFlick? {
         if (preferLongPress) {
-            val longPress = resolveTextFromMap(direction, longPressTextMap)
-            if (!longPress.isNullOrEmpty()) {
-                return longPress
-            }
+            resolveNormalizedFromMap(direction, longPressActionMap)?.let { return it }
         }
-        return resolveTextFromMap(direction, textMap)
+        return resolveNormalizedFromMap(direction, baseActionMap)
     }
 
-    // 指定した Map から FlickDirection に対応する文字列を候補順に検索して返す。
-    private fun resolveTextFromMap(
+    private fun resolveNormalizedFromMap(
         direction: FlickDirection,
-        source: Map<FlickDirection, String>
-    ): String? {
+        source: Map<FlickDirection, FlickAction>
+    ): NormalizedFlick? {
         for (candidate in getDirectionCandidates(direction)) {
-            val value = source[candidate]
-            if (!value.isNullOrEmpty()) {
-                return value
+            val action = source[candidate] ?: continue
+            val normalized = action.toNormalizedFlick()
+            if (normalized.isCommittable()) {
+                return normalized
             }
         }
         return null
@@ -363,14 +378,19 @@ class CrossFlickInputController(
     private fun showActionPopup(direction: FlickDirection, highlighted: Boolean) {
         if (direction == FlickDirection.TAP) return
 
-        val flickAction = resolveAction(direction) ?: return
+        val flickAction = resolveFlickAction(direction, preferLongPress = false) ?: return
         val anchor = anchorView ?: return
         if (!anchor.isAttachedToWindow) return
 
         val popupView = CrossFlickPopupView(context).apply {
-            setContent(flickAction)
+            setCells(
+                map = mapOf(direction to flickAction),
+                keyWidth = anchor.width,
+                keyHeight = anchor.height,
+                compactSingleCell = true
+            )
             popupColorTheme?.let { setColors(it) }
-            setHighlight(highlighted)
+            if (highlighted) highlightDirection(direction)
         }
 
         val popupWindow = PopupWindow(popupView, anchor.width, anchor.height, false).apply {
@@ -421,7 +441,7 @@ class CrossFlickInputController(
     // 全アクションポップアップのうち指定方向だけをハイライト状態にする。長押し中の指移動で呼ばれる。
     private fun highlightActionPopup(direction: FlickDirection) {
         actionPopupViews.forEach { (dir, popupView) ->
-            popupView.setHighlight(dir == direction)
+            popupView.highlightDirection(if (dir == direction) dir else null)
         }
     }
 
@@ -450,11 +470,13 @@ class CrossFlickInputController(
         )
 
         directions.forEach { direction ->
-            val text = resolveText(direction, preferLongPress = false)
-            if (text.isNullOrEmpty()) return@forEach
+            val displayText = resolveNormalized(
+                direction = direction,
+                preferLongPress = false
+            )?.toDisplayText() ?: return@forEach
 
             val popupView = DirectionalKeyPopupView(context).apply {
-                this.text = text
+                this.text = displayText
                 popupColorTheme?.let { setColors(it) }
                 setFlickDirection(direction)
             }
@@ -559,11 +581,11 @@ class CrossFlickInputController(
         val currentAnchor = anchorView ?: return
         if (!currentAnchor.isAttachedToWindow) return
 
-        val popupView = gridPopup.contentView as FlickGridPopupView
+        val popupView = gridPopup.contentView as CrossFlickPopupView
         popupColorTheme?.let { popupView.setColors(it) }
 
-        popupView.setCharacters(getLongPressDisplayMap(), currentAnchor.width, currentAnchor.height)
-        popupView.highlightKey(currentDirection)
+        popupView.setCells(getLongPressDisplayMap(), currentAnchor.width, currentAnchor.height)
+        popupView.highlightDirection(currentDirection)
 
         val location = IntArray(2)
         currentAnchor.getLocationInWindow(location)
@@ -584,24 +606,30 @@ class CrossFlickInputController(
 
     // グリッドポップアップ内の対応セルをハイライトする。長押し中の指移動で呼ばれる。
     private fun highlightGrid(direction: FlickDirection) {
-        (gridPopup.contentView as? FlickGridPopupView)?.highlightKey(direction)
+        (gridPopup.contentView as? CrossFlickPopupView)?.highlightDirection(direction)
     }
 
-    // グリッドポップアップに渡す表示文字マップを生成する。各方向で longPressTextMap を優先し、なければ textMap を使う。
-    private fun getLongPressDisplayMap(): Map<FlickDirection, String> {
-        return mapOf(
-            FlickDirection.TAP to (resolveText(FlickDirection.TAP, preferLongPress = true) ?: ""),
-            FlickDirection.UP to (resolveText(FlickDirection.UP, preferLongPress = true) ?: ""),
-            FlickDirection.DOWN to (resolveText(FlickDirection.DOWN, preferLongPress = true) ?: ""),
-            FlickDirection.UP_LEFT_FAR to (resolveText(FlickDirection.UP_LEFT_FAR, preferLongPress = true) ?: ""),
-            FlickDirection.UP_RIGHT_FAR to (resolveText(FlickDirection.UP_RIGHT_FAR, preferLongPress = true) ?: "")
+    // グリッドポップアップに渡す表示マップを生成する。各方向で longPressActionMap を優先し、なければ baseActionMap を使う。
+    private fun getLongPressDisplayMap(): Map<FlickDirection, FlickAction> {
+        val directions = listOf(
+            FlickDirection.TAP,
+            FlickDirection.UP,
+            FlickDirection.DOWN,
+            FlickDirection.UP_LEFT_FAR,
+            FlickDirection.UP_RIGHT_FAR
         )
+        return directions.mapNotNull { dir ->
+            val action = resolveFlickAction(dir, preferLongPress = true) ?: return@mapNotNull null
+            val normalized = action.toNormalizedFlick()
+            if (!normalized.hasDisplayContent()) return@mapNotNull null
+            dir to action
+        }.toMap()
     }
 
     // TEXT モードで ACTION_DOWN 時に消したボタンのラベルを復元する。ACTION_UP/CANCEL および cancel() から呼ばれる。
     private fun restoreOriginalButtonText() {
         (anchorView as? Button)?.let { button ->
-            if (inputMode == InputMode.TEXT) {
+            if (popupStyle == PopupStyle.TEXT_GRID) {
                 button.text = originalKeyText
             }
         }
@@ -626,8 +654,67 @@ class CrossFlickInputController(
         dismissDirectionalPopups()
     }
 
-    private fun FlickAction.toKeyAction(): KeyAction = when (this) {
-        is FlickAction.Input -> KeyAction.Text(char)
-        is FlickAction.Action -> action
+    private inline fun withPopupStyle(
+        onActionPreview: () -> Unit,
+        onTextGrid: () -> Unit
+    ) {
+        when (popupStyle) {
+            PopupStyle.ACTION_PREVIEW -> onActionPreview()
+            PopupStyle.TEXT_GRID -> onTextGrid()
+        }
+    }
+
+    private fun Map<FlickDirection, String>.toInputActionMap(): Map<FlickDirection, FlickAction> {
+        return mapNotNull { (direction, text) ->
+            text.takeUnless { it.isEmpty() }?.let { direction to FlickAction.Input(it) }
+        }.toMap()
+    }
+
+    private fun FlickAction.toNormalizedFlick(): NormalizedFlick = when (this) {
+        is FlickAction.Input -> {
+            NormalizedFlick(
+                commitAction = KeyAction.Text(char),
+                displayText = char.takeUnless { it.isEmpty() },
+                displayLabel = null,
+                drawableResId = null
+            )
+        }
+
+        is FlickAction.Action -> {
+            val text = when (action) {
+                is KeyAction.Text -> action.text
+                is KeyAction.InputText -> action.text
+                else -> null
+            }?.takeUnless { it.isEmpty() }
+
+            val fallbackLabel = if (drawableResId == null && label.isNullOrEmpty() && text == null) {
+                action.javaClass.simpleName.firstOrNull()?.toString()
+            } else {
+                null
+            }
+
+            NormalizedFlick(
+                commitAction = action,
+                displayText = text,
+                displayLabel = label?.takeUnless { it.isEmpty() } ?: fallbackLabel,
+                drawableResId = drawableResId
+            )
+        }
+    }
+
+    private fun NormalizedFlick.isCommittable(): Boolean {
+        return when (val action = commitAction) {
+            is KeyAction.Text -> action.text.isNotEmpty()
+            is KeyAction.InputText -> action.text.isNotEmpty()
+            else -> true
+        }
+    }
+
+    private fun NormalizedFlick.hasDisplayContent(): Boolean {
+        return drawableResId != null || !displayLabel.isNullOrEmpty() || !displayText.isNullOrEmpty()
+    }
+
+    private fun NormalizedFlick.toDisplayText(): String? {
+        return displayLabel ?: displayText
     }
 }

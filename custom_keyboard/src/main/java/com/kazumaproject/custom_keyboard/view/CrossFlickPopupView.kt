@@ -4,126 +4,233 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.GradientDrawable
-import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import com.kazumaproject.custom_keyboard.data.FlickAction
+import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
+import com.kazumaproject.custom_keyboard.data.KeyAction
 import com.google.android.material.R as materialR
 
-/**
- * 十字フリック用のポップアップビュー。文字とアイコンの両方に対応。
- */
-class CrossFlickPopupView @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr) {
+private data class PopupCellContent(
+    val text: String?,
+    val label: String?,
+    val drawableResId: Int?
+)
 
-    private val backgroundShape = GradientDrawable()
-    private var isHighlighted = false
+private fun FlickAction.toPopupCellContent(): PopupCellContent = when (this) {
+    is FlickAction.Input -> PopupCellContent(
+        text = char.takeUnless { it.isEmpty() },
+        label = null,
+        drawableResId = null
+    )
 
-    private lateinit var textView: TextView
-    private lateinit var imageView: ImageView
+    is FlickAction.Action -> {
+        val text = when (val keyAction = action) {
+            is KeyAction.Text -> keyAction.text
+            is KeyAction.InputText -> keyAction.text
+            else -> keyAction.javaClass.simpleName.firstOrNull()?.toString()
+        }?.takeUnless { it.isEmpty() }
 
-    // 動的に設定される色を保持する変数
-    private var colorTheme: FlickPopupColorTheme? = null
-
-    private fun Context.getColorFromAttr(attrRes: Int): Int {
-        val typedValue = TypedValue()
-        theme.resolveAttribute(attrRes, typedValue, true)
-        return this.getColor(typedValue.resourceId)
+        PopupCellContent(
+            text = text,
+            label = label?.takeUnless { it.isEmpty() },
+            drawableResId = drawableResId
+        )
     }
+}
 
-    init {
-        initViews()
-        updateBackgroundColor()
-        background = backgroundShape
-    }
-
-    private fun initViews() {
-        // TextView for characters
-        textView = AppCompatTextView(context).apply {
+class CrossFlickPopupView(context: Context) : FrameLayout(context) {
+    private class CellView(context: Context) : FrameLayout(context) {
+        val textView: TextView = AppCompatTextView(context).apply {
             gravity = Gravity.CENTER
             setTextColor(Color.WHITE)
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
             visibility = View.GONE
         }
-        // ImageView for icons
-        imageView = AppCompatImageView(context).apply {
+        val imageView: ImageView = AppCompatImageView(context).apply {
             scaleType = ImageView.ScaleType.CENTER_INSIDE
             visibility = View.GONE
+            val padding = (8 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
         }
-        val padding = (8 * resources.displayMetrics.density).toInt()
-        imageView.setPadding(padding, padding, padding, padding)
+        val backgroundShape = GradientDrawable()
 
-        addView(textView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
-        addView(imageView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+        init {
+            addView(textView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            addView(imageView, LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT))
+            background = backgroundShape
+        }
+
+        fun setContent(action: FlickAction) {
+            val content = action.toPopupCellContent()
+            if (content.drawableResId != null) {
+                imageView.setImageResource(content.drawableResId)
+                imageView.visibility = View.VISIBLE
+                textView.visibility = View.GONE
+                return
+            }
+
+            val text = content.label ?: content.text
+            if (text.isNullOrEmpty()) {
+                textView.visibility = View.GONE
+                imageView.visibility = View.GONE
+                return
+            }
+
+            textView.text = text
+            textView.visibility = View.VISIBLE
+            imageView.visibility = View.GONE
+        }
+
+        fun applyColors(theme: FlickPopupColorTheme, highlighted: Boolean) {
+            textView.setTextColor(theme.textColor)
+            imageView.setColorFilter(theme.textColor, PorterDuff.Mode.SRC_IN)
+            backgroundShape.cornerRadius = 24f
+            backgroundShape.setColor(
+                if (highlighted) theme.segmentHighlightGradientStartColor
+                else theme.centerGradientStartColor
+            )
+            backgroundShape.setStroke(
+                (1 * resources.displayMetrics.density).toInt(),
+                theme.separatorColor
+            )
+        }
+
+        fun applyFallbackColors(context: Context, highlighted: Boolean) {
+            val typedValue = TypedValue()
+            val color = if (highlighted) {
+                context.theme.resolveAttribute(materialR.attr.colorSecondaryContainer, typedValue, true)
+                context.getColor(typedValue.resourceId)
+            } else {
+                context.theme.resolveAttribute(materialR.attr.colorSurfaceContainer, typedValue, true)
+                context.getColor(typedValue.resourceId)
+            }
+            backgroundShape.cornerRadius = 24f
+            backgroundShape.setColor(color)
+        }
+    }
+
+    private val gridLayout = GridLayout(context).apply {
+        columnCount = 3
+        rowCount = 3
+        alignmentMode = GridLayout.ALIGN_BOUNDS
+    }
+
+    private val cells = mutableMapOf<FlickDirection, CellView>()
+    private var colorTheme: FlickPopupColorTheme? = null
+    private var highlightedDirection: FlickDirection? = null
+
+    init {
+        addView(gridLayout, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
     }
 
     fun setColors(theme: FlickPopupColorTheme) {
-        this.colorTheme = theme
-        textView.setTextColor(theme.textColor)
-        imageView.setColorFilter(theme.textColor, PorterDuff.Mode.SRC_IN)
-        updateBackgroundColor()
-    }
-
-    private fun updateBackgroundColor() {
-        backgroundShape.cornerRadius = 24f
-
-        val theme = colorTheme
-        val color = if (theme != null) {
-            if (isHighlighted) theme.segmentHighlightGradientStartColor else theme.centerGradientStartColor
-        } else {
-            if (isHighlighted) {
-                context.getColorFromAttr(materialR.attr.colorSecondaryContainer)
-            } else {
-                context.getColorFromAttr(materialR.attr.colorSurfaceContainer)
-            }
+        colorTheme = theme
+        cells.forEach { (dir, cell) ->
+            cell.applyColors(theme, dir == highlightedDirection)
         }
-        backgroundShape.setColor(color)
     }
 
-    /**
-     * 表示するコンテンツを設定する
-     * @param flickAction 表示するFlickAction (文字またはアクション)
-     */
-    fun setContent(flickAction: FlickAction) {
-        when (flickAction) {
-            is FlickAction.Input -> {
-                textView.text = flickAction.char
-                textView.visibility = View.VISIBLE
-                imageView.visibility = View.GONE
+    fun setCells(
+        map: Map<FlickDirection, FlickAction>,
+        keyWidth: Int,
+        keyHeight: Int,
+        compactSingleCell: Boolean = false
+    ) {
+        gridLayout.removeAllViews()
+        cells.clear()
+        gridLayout.columnCount = 3
+        gridLayout.rowCount = 3
+
+        if (compactSingleCell && map.size == 1) {
+            val (direction, action) = map.entries.first()
+            val margin = (1 * context.resources.displayMetrics.density).toInt()
+            val params = GridLayout.LayoutParams(
+                GridLayout.spec(0),
+                GridLayout.spec(0)
+            ).apply {
+                width = keyWidth
+                height = keyHeight
+                setMargins(margin, margin, margin, margin)
             }
 
-            is FlickAction.Action -> {
-                if (flickAction.drawableResId != null) {
-                    imageView.setImageResource(flickAction.drawableResId)
-                    imageView.visibility = View.VISIBLE
-                    textView.visibility = View.GONE
-                } else if (!flickAction.label.isNullOrEmpty()) {
-                    textView.text = flickAction.label
-                    textView.visibility = View.VISIBLE
-                    imageView.visibility = View.GONE
+            gridLayout.columnCount = 1
+            gridLayout.rowCount = 1
+
+            val cell = CellView(context).apply {
+                setContent(action)
+                val theme = colorTheme
+                if (theme != null) {
+                    applyColors(theme, direction == highlightedDirection)
                 } else {
-                    textView.text = flickAction.action.javaClass.simpleName.first().toString()
-                    textView.visibility = View.VISIBLE
-                    imageView.visibility = View.GONE
+                    applyFallbackColors(context, direction == highlightedDirection)
                 }
             }
+            cell.layoutParams = params
+            gridLayout.addView(cell)
+            cells[direction] = cell
+            return
+        }
+
+        val gridPositions = mapOf(
+            FlickDirection.UP to Pair(0, 1),
+            FlickDirection.DOWN to Pair(2, 1),
+            FlickDirection.UP_LEFT_FAR to Pair(1, 0),
+            FlickDirection.UP_RIGHT_FAR to Pair(1, 2),
+            FlickDirection.TAP to Pair(1, 1)
+        )
+
+        gridPositions.forEach { (direction, pos) ->
+            val action = map[direction]
+            val margin = (1 * context.resources.displayMetrics.density).toInt()
+
+            val params = GridLayout.LayoutParams(
+                GridLayout.spec(pos.first),
+                GridLayout.spec(pos.second)
+            ).apply {
+                width = keyWidth
+                height = keyHeight
+                setMargins(margin, margin, margin, margin)
+            }
+
+            if (action != null) {
+                val cell = CellView(context).apply {
+                    setContent(action)
+                    val theme = colorTheme
+                    if (theme != null) {
+                        applyColors(theme, direction == highlightedDirection)
+                    } else {
+                        applyFallbackColors(context, direction == highlightedDirection)
+                    }
+                }
+                cell.layoutParams = params
+                gridLayout.addView(cell)
+                cells[direction] = cell
+            } else {
+                val placeholder = View(context)
+                placeholder.layoutParams = params
+                gridLayout.addView(placeholder)
+            }
         }
     }
 
-    fun setHighlight(highlighted: Boolean) {
-        if (isHighlighted != highlighted) {
-            isHighlighted = highlighted
-            updateBackgroundColor()
+    fun highlightDirection(direction: FlickDirection?) {
+        highlightedDirection = direction
+        val theme = colorTheme
+        cells.forEach { (dir, cell) ->
+            if (theme != null) {
+                cell.applyColors(theme, dir == direction)
+            } else {
+                cell.applyFallbackColors(context, dir == direction)
+            }
         }
     }
 }
