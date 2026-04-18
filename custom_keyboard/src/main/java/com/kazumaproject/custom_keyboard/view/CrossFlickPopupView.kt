@@ -17,6 +17,7 @@ import com.kazumaproject.custom_keyboard.data.FlickAction
 import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
 import com.kazumaproject.custom_keyboard.data.KeyAction
+import com.kazumaproject.custom_keyboard.data.KeyActionMapper
 import com.google.android.material.R as materialR
 
 private data class PopupCellContent(
@@ -25,7 +26,7 @@ private data class PopupCellContent(
     val drawableResId: Int?
 )
 
-private fun FlickAction.toPopupCellContent(): PopupCellContent = when (this) {
+private fun FlickAction.toPopupCellContent(context: Context): PopupCellContent = when (this) {
     is FlickAction.Input -> PopupCellContent(
         text = char.takeUnless { it.isEmpty() },
         label = null,
@@ -36,13 +37,18 @@ private fun FlickAction.toPopupCellContent(): PopupCellContent = when (this) {
         val text = when (val keyAction = action) {
             is KeyAction.Text -> keyAction.text
             is KeyAction.InputText -> keyAction.text
-            else -> keyAction.javaClass.simpleName.firstOrNull()?.toString()
+            else -> null
         }?.takeUnless { it.isEmpty() }
+
+        val resolvedDrawableResId = drawableResId
+            ?: KeyActionMapper.getDisplayActions(context)
+                .firstOrNull { it.action::class == action::class }
+                ?.iconResId
 
         PopupCellContent(
             text = text,
             label = label?.takeUnless { it.isEmpty() },
-            drawableResId = drawableResId
+            drawableResId = resolvedDrawableResId
         )
     }
 }
@@ -70,7 +76,7 @@ class CrossFlickPopupView(context: Context) : FrameLayout(context) {
         }
 
         fun setContent(action: FlickAction) {
-            val content = action.toPopupCellContent()
+            val content = action.toPopupCellContent(context)
             if (content.drawableResId != null) {
                 imageView.setImageResource(content.drawableResId)
                 imageView.visibility = View.VISIBLE
