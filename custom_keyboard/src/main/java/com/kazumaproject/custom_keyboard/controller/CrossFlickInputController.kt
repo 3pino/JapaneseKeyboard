@@ -16,6 +16,7 @@ import com.kazumaproject.custom_keyboard.data.FlickAction
 import com.kazumaproject.custom_keyboard.data.FlickDirection
 import com.kazumaproject.custom_keyboard.data.FlickPopupColorTheme
 import com.kazumaproject.custom_keyboard.data.KeyAction
+import com.kazumaproject.custom_keyboard.data.KeyActionMapper
 import com.kazumaproject.custom_keyboard.view.DirectionalKeyPopupView
 import com.kazumaproject.custom_keyboard.view.CrossFlickPopupView
 import kotlinx.coroutines.CoroutineScope
@@ -84,6 +85,9 @@ class CrossFlickInputController(
     private var longPressTimeout: Long = ViewConfiguration.getLongPressTimeout().toLong()
 
     private var popupColorTheme: FlickPopupColorTheme? = null
+    private val displayActionIconMap by lazy {
+        KeyActionMapper.getDisplayActions(context).associate { it.action::class to it.iconResId }
+    }
 
     // 色設定。FlickPopupColorTheme をまとめて受け取り、全ポップアップに適用する。
     fun setPopupColors(theme: FlickPopupColorTheme) {
@@ -392,7 +396,7 @@ class CrossFlickInputController(
 
         val popupView = CrossFlickPopupView(context).apply {
             setCells(
-                map = mapOf(direction to flickAction),
+                map = mapOf(direction to flickAction.withResolvedPopupIcon()),
                 keyWidth = anchor.width,
                 keyHeight = anchor.height,
                 compactSingleCell = true
@@ -599,7 +603,11 @@ class CrossFlickInputController(
         val popupView = gridPopup.contentView as CrossFlickPopupView
         popupColorTheme?.let { popupView.setColors(it) }
 
-        popupView.setCells(getLongPressDisplayMap(), currentAnchor.width, currentAnchor.height)
+        popupView.setCells(
+            getLongPressDisplayMap().withResolvedPopupIcons(),
+            currentAnchor.width,
+            currentAnchor.height
+        )
         popupView.highlightDirection(currentDirection)
 
         val location = IntArray(2)
@@ -685,24 +693,39 @@ class CrossFlickInputController(
         }.toMap()
     }
 
+    private fun FlickAction.withResolvedPopupIcon(): FlickAction = when (this) {
+        is FlickAction.Input -> this
+        is FlickAction.Action -> {
+            if (drawableResId != null) this
+            else copy(drawableResId = resolvePopupIconResId(action))
+        }
+    }
+
+    private fun Map<FlickDirection, FlickAction>.withResolvedPopupIcons(): Map<FlickDirection, FlickAction> {
+        return mapValues { (_, action) -> action.withResolvedPopupIcon() }
+    }
+
+    private fun resolvePopupIconResId(action: KeyAction): Int? = displayActionIconMap[action::class]
+
     private fun FlickAction.toNormalizedFlick(): NormalizedFlick = when (this) {
         is FlickAction.Input -> {
             NormalizedFlick(
                 commitAction = KeyAction.Text(char),
                 displayText = char.takeUnless { it.isEmpty() },
-                displayLabel = null,
-                drawableResId = null
+                displayLabel = label?.takeUnless { it.isEmpty() },
+                drawableResId = drawableResId
             )
         }
 
         is FlickAction.Action -> {
+            val resolvedDrawableResId = drawableResId ?: resolvePopupIconResId(action)
             val text = when (action) {
                 is KeyAction.Text -> action.text
                 is KeyAction.InputText -> action.text
                 else -> null
             }?.takeUnless { it.isEmpty() }
 
-            val fallbackLabel = if (drawableResId == null && label.isNullOrEmpty() && text == null) {
+            val fallbackLabel = if (resolvedDrawableResId == null && label.isNullOrEmpty() && text == null) {
                 action.javaClass.simpleName.firstOrNull()?.toString()
             } else {
                 null
@@ -712,7 +735,7 @@ class CrossFlickInputController(
                 commitAction = action,
                 displayText = text,
                 displayLabel = label?.takeUnless { it.isEmpty() } ?: fallbackLabel,
-                drawableResId = drawableResId
+                drawableResId = resolvedDrawableResId
             )
         }
     }
